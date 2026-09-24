@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { PageStage } from "@/components/story/PageStage";
 import { FORMATS } from "@/lib/formats";
 import { allPages, useEditor } from "@/lib/store";
-import { LAYOUT_BAR_H, LayoutBar } from "./LayoutBar";
 import { PageToolbar, TOOLBAR_H, TOOLBAR_MIN_W } from "./PageToolbar";
+import { PageToolsBar, TOOLS_BAR_H } from "./PageToolsBar";
 import { usePageImageUpload } from "./usePageImage";
 
 /** The large preview of the selected page, fitted to the available space. */
@@ -26,8 +26,8 @@ export function CanvasView({ fontsRev }: { fontsRev: number | null }) {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  // The toolbar sits above the page and the layout bar below it; the page gets the height left over.
-  const chrome = TOOLBAR_H + LAYOUT_BAR_H;
+  // The toolbar sits above the page and the tools bar below it; the page gets the height left over.
+  const chrome = TOOLBAR_H + TOOLS_BAR_H;
   const scale = box.w && box.h > chrome ? Math.min(box.w / width, (box.h - chrome) / height, 1) : 0;
 
   const { upload } = usePageImageUpload();
@@ -67,7 +67,7 @@ export function CanvasView({ fontsRev }: { fontsRev: number | null }) {
               fontsRev={fontsRev}
               />
             </div>
-            <LayoutBar page={page} isCover={index === 0} width={width * scale} />
+            <PageToolsBar page={page} isCover={index === 0} width={width * scale} />
           </div>
         ) : (
           <p className="text-sm text-neutral-500">A carregar…</p>

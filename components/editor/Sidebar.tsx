@@ -1,12 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { getLayoutDef } from "@/components/story/layouts";
-import { resolveImageUrl } from "@/lib/images";
 import { allPages, useEditor } from "@/lib/store";
 import type { StoryPage } from "@/types/story";
-import { Icon } from "./Icon";
-import { usePageImageUpload } from "./usePageImage";
 
 const label = "mb-1.5 block text-xs font-medium text-neutral-500";
 const field =
@@ -50,57 +46,7 @@ function PageSection({ page, index }: { page: StoryPage; index: number }) {
           <textarea rows={def.fields.body === "Texto" ? 6 : 2} className={field + " resize-y"} value={page.body ?? ""} onChange={(e) => set({ body: e.target.value })} />
         </label>
       )}
-      {def?.fields.image && <ImageField page={page} optional={def.fields.image === "optional"} />}
     </section>
-  );
-}
-
-function ImageField({ page, optional }: { page: StoryPage; optional: boolean }) {
-  const updatePage = useEditor((s) => s.updatePage);
-  const { upload, busy, error } = usePageImageUpload();
-  const input = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-
-  useEffect(() => {
-    let live = true;
-    setPreview(null);
-    if (page.imageUrl) resolveImageUrl(page.imageUrl).then((u) => live && setPreview(u), () => {});
-    return () => {
-      live = false;
-    };
-  }, [page.imageUrl]);
-
-  return (
-    <div className="mb-5">
-      <span className={label}>Imagem{optional ? " (opcional)" : ""}</span>
-      <div className="flex items-center gap-3">
-        <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-lg bg-neutral-100 text-neutral-400 dark:bg-neutral-800">
-          {/* eslint-disable-next-line @next/next/no-img-element -- local blob/object URLs */}
-          {preview ? <img src={preview} alt="" className="h-full w-full object-cover" /> : <Icon name="image" />}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => input.current?.click()} disabled={busy} className="rounded-lg border border-neutral-200 px-3 py-1.5 text-sm hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
-            {busy ? "A carregar…" : page.imageUrl ? "Trocar" : "Carregar"}
-          </button>
-          {page.imageUrl && (
-            <button onClick={() => updatePage(page.id, { imageUrl: undefined })} className="rounded-lg px-2 py-1.5 text-sm text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800">
-              Remover
-            </button>
-          )}
-        </div>
-      </div>
-      <p className="mt-2 text-xs text-neutral-400">{error ?? "Também podes arrastar uma imagem para a página."}</p>
-      <input
-        ref={input}
-        type="file"
-        accept="image/*"
-        hidden
-        onChange={(e) => {
-          upload(page.id, e.target.files?.[0]);
-          e.target.value = "";
-        }}
-      />
-    </div>
   );
 }
 
