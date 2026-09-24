@@ -2,6 +2,10 @@ import type { Story, StoryFormat, StoryPage } from "@/types/story";
 import { THEMES } from "@/lib/themes";
 import { uid } from "@/lib/uid";
 
+// GitHub Pages serves this app from /minicanva/, so root-relative mock asset paths
+// need the same prefix Next.js applies to its own routes (see next.config.mjs).
+const mockAsset = (path: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path}`;
+
 export function newPage(): StoryPage {
   return { id: uid(), layout: "image-top-text-bottom", title: "Novo título", body: "Escreve aqui o texto desta página." };
 }
@@ -28,7 +32,7 @@ export function sampleStory(): Story {
       layout: "cover-title-image",
       title: "O regresso da tipografia editorial",
       body: "Porque é que os carrosséis estão a voltar a parecer revistas.",
-      imageUrl: "/mock/landscape.svg",
+      imageUrl: mockAsset("/mock/landscape.svg"),
     },
     pages: [
       {
@@ -37,7 +41,7 @@ export function sampleStory(): Story {
         title: "Quando a página volta a ser um objeto",
         body:
           "Durante anos, o feed tratou cada imagem como descartável. Agora, os carrosséis em formato de revista pedem outra atenção: margens generosas, hierarquia clara e um ritmo de leitura que convida a passar para a página seguinte.",
-        imageUrl: "/mock/landscape.svg",
+        imageUrl: mockAsset("/mock/landscape.svg"),
       },
       {
         id: uid(),
@@ -57,7 +61,7 @@ export function sampleStory(): Story {
         layout: "image-full-bleed",
         title: "Deixa a imagem falar",
         body: "Uma página inteira de imagem dá descanso entre blocos de texto.",
-        imageUrl: "/mock/shapes.svg",
+        imageUrl: mockAsset("/mock/shapes.svg"),
       },
       {
         id: uid(),
