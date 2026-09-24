@@ -5,7 +5,7 @@ import { PageStage } from "@/components/story/PageStage";
 import { FORMATS } from "@/lib/formats";
 import { allPages, useEditor } from "@/lib/store";
 import { LAYOUT_BAR_H, LayoutBar } from "./LayoutBar";
-import { PageToolbar, TOOLBAR_H } from "./PageToolbar";
+import { PageToolbar, TOOLBAR_H, TOOLBAR_MIN_W } from "./PageToolbar";
 import { usePageImageUpload } from "./usePageImage";
 
 /** The large preview of the selected page, fitted to the available space. */
@@ -51,8 +51,10 @@ export function CanvasView({ fontsRev }: { fontsRev: number | null }) {
       {/* Absolutely positioned so its size is definite even when the parent only has a min-height (mobile). */}
       <div ref={boxRef} className="absolute inset-5 flex items-center justify-center md:inset-10">
         {scale > 0 && fontsRev !== null ? (
-          <div>
-            <PageToolbar page={page} index={index} pageCount={pages.length} width={width * scale} />
+          // items-center: the toolbar can be wider than the page (it has a minimum width),
+          // so this keeps the page and layout bar centred underneath it.
+          <div className="flex flex-col items-center">
+            <PageToolbar page={page} index={index} format={story.format} width={Math.max(width * scale, TOOLBAR_MIN_W)} />
             <div className="shadow-[0_12px_40px_rgba(0,0,0,.18)]">
               <PageStage
               page={page}

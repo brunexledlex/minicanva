@@ -4,7 +4,20 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { exportPagePng, exportPdf, exportZip } from "@/lib/export";
 import { FORMATS } from "@/lib/formats";
 import { type Step, useEditor } from "@/lib/store";
+import type { StoryFormat } from "@/types/story";
 import { Icon } from "./Icon";
+
+const FORMAT_KEYS = Object.keys(FORMATS) as StoryFormat[];
+
+/** Outline of the format's proportions, for the "Novo" menu. */
+function FormatShape({ format }: { format: StoryFormat }) {
+  const { width, height } = FORMATS[format];
+  return (
+    <span className="flex h-7 w-6 shrink-0 items-center justify-center">
+      <span className="rounded-[2px] border-2 border-neutral-400" style={{ width: 16, height: (16 * height) / width }} />
+    </span>
+  );
+}
 
 export function Header({ ready }: { ready: boolean }) {
   const newStory = useEditor((s) => s.newStory);
@@ -18,10 +31,15 @@ export function Header({ ready }: { ready: boolean }) {
       <Menu
         label="Novo"
         icon="note_add"
-        items={[
-          { label: "Story em branco", onClick: () => confirm("Começar um Story novo? O atual é substituído.") && newStory(false) },
-          { label: "Story de exemplo", onClick: () => confirm("Carregar o exemplo? O Story atual é substituído.") && newStory(true) },
-        ]}
+        items={FORMAT_KEYS.map((f) => {
+            const { width, height, label } = FORMATS[f];
+            return {
+              label,
+              hint: `${f} · ${width}×${height}`,
+              icon: <FormatShape format={f} />,
+              onClick: () => confirm(`Começar um Story novo em ${label.toLowerCase()} (${f})? O atual é substituído.`) && newStory(f),
+            };
+          })}
       />
       <ExportMenu ready={ready} />
     </header>
@@ -65,7 +83,7 @@ function Stepper() {
   );
 }
 
-type Item = { label: string; hint?: string; onClick: () => void };
+type Item = { label: string; hint?: string; icon?: ReactNode; onClick: () => void };
 
 type MenuProps = { label: string; icon: string; items: Item[]; primary?: boolean; /** Controls above the items that don't close the menu. */ header?: ReactNode };
 
@@ -100,10 +118,13 @@ function Menu({ label, icon, items, primary, header }: MenuProps) {
                 setOpen(false);
                 it.onClick();
               }}
-              className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
-              {it.label}
-              {it.hint && <span className="block text-xs text-neutral-500">{it.hint}</span>}
+              {it.icon}
+              <span className="min-w-0">
+                {it.label}
+                {it.hint && <span className="block text-xs tabular-nums text-neutral-500">{it.hint}</span>}
+              </span>
             </button>
           ))}
         </div>

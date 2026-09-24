@@ -21,7 +21,6 @@ export type StoryPage = {
   title?: string;
   body?: string;
   imageUrl?: string;
-  themeOverride?: Partial<Theme>;
 };
 
 export type StoryFormat = "1:1" | "4:5" | "9:16";

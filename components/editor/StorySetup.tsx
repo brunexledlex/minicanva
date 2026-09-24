@@ -5,7 +5,6 @@ import { PageStage } from "@/components/story/PageStage";
 import { FORMATS } from "@/lib/formats";
 import { allPages, useEditor } from "@/lib/store";
 import { THEMES } from "@/lib/themes";
-import type { StoryFormat } from "@/types/story";
 import { Icon } from "./Icon";
 
 const label = "mb-2 block text-xs font-medium text-neutral-500";
@@ -16,50 +15,34 @@ const cardIdle = "border-neutral-200 hover:border-neutral-300 dark:border-neutra
 /** Step 1: the story-wide settings (name, format, theme), with a live preview. */
 export function StorySetup({ fontsRev }: { fontsRev: number | null }) {
   const story = useEditor((s) => s.story);
-  const { setName, setFormat, setTheme, setStep } = useEditor.getState();
+  const { setName, setTheme, setStep } = useEditor.getState();
+  const format = FORMATS[story.format];
+  // Name and theme apply live as they're edited; remembering the values from when this
+  // step opened lets "Cancelar" put them back instead of just leaving the edits in place.
+  const [initial] = useState(() => ({ name: story.name, themeId: story.theme.id }));
+  const cancel = () => {
+    setName(initial.name);
+    setTheme(initial.themeId);
+    setStep("edit");
+  };
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="mx-auto grid max-w-5xl gap-8 px-5 py-8 md:grid-cols-2 md:gap-12 md:px-10 md:py-12">
+      <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)] gap-8 px-5 py-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-12 md:px-10 md:py-12">
         <div className="order-2 md:order-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Configura o teu Story</h1>
-          <p className="mb-8 mt-1 text-sm text-neutral-500">O nome, o formato e o tema valem para todas as páginas. Podes voltar a este passo a qualquer momento.</p>
+          <p className="mb-8 inline-flex items-center gap-2 rounded-full bg-neutral-200/70 px-3 py-1 text-xs text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+            <span className="rounded-[2px] border-[1.5px] border-current" style={{ width: 9, height: (9 * format.height) / format.width }} />
+            {format.label} · {story.format} · {format.width}×{format.height}
+          </p>
 
           <label className="mb-7 block">
-            <span className={label}>Nome</span>
+            <span className={label}>Título</span>
             <input
               className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 dark:border-neutral-700 dark:bg-neutral-900"
               value={story.name}
               onChange={(e) => setName(e.target.value)}
             />
           </label>
-
-          <span className={label}>Formato</span>
-          <div className="mb-7 grid grid-cols-3 gap-2" role="radiogroup" aria-label="Formato">
-            {(Object.keys(FORMATS) as StoryFormat[]).map((f) => {
-              const { width, height, label: name } = FORMATS[f];
-              const active = f === story.format;
-              return (
-                <button
-                  key={f}
-                  role="radio"
-                  aria-checked={active}
-                  onClick={() => setFormat(f)}
-                  className={`${card} ${active ? cardActive : cardIdle} flex flex-col items-center gap-2 px-2 pb-3 pt-4`}
-                >
-                  <span className="flex h-10 items-end">
-                    <span className={`rounded-[3px] border-2 ${active ? "border-indigo-500" : "border-neutral-400"}`} style={{ width: 22, height: (22 * height) / width }} />
-                  </span>
-                  <span className={`text-sm font-medium ${active ? "text-indigo-700 dark:text-indigo-300" : ""}`}>{name}</span>
-                  <span className="text-center text-[11px] leading-tight tabular-nums text-neutral-400">
-                    {f}
-                    <br />
-                    {width}×{height}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
 
           <span className={label}>Tema</span>
           <div className="mb-8 grid gap-2" role="radiogroup" aria-label="Tema">
@@ -93,13 +76,21 @@ export function StorySetup({ fontsRev }: { fontsRev: number | null }) {
             })}
           </div>
 
-          <button
-            onClick={() => setStep("edit")}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-neutral-900 text-sm font-medium text-white hover:bg-neutral-700 sm:w-auto sm:px-6 dark:bg-white dark:text-neutral-900"
-          >
-            Continuar para as páginas
-            <Icon name="arrow_forward" className="!text-[18px]" />
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={cancel}
+              className="flex h-11 flex-1 items-center justify-center rounded-lg border border-neutral-200 text-sm font-medium text-neutral-600 hover:bg-neutral-100 sm:flex-none sm:px-6 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => setStep("edit")}
+              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-neutral-900 text-sm font-medium text-white hover:bg-neutral-700 sm:flex-none sm:px-6 dark:bg-white dark:text-neutral-900"
+            >
+              Páginas
+              <Icon name="arrow_forward" className="!text-[18px]" />
+            </button>
+          </div>
         </div>
 
         <div className="order-1 md:order-2">
@@ -112,10 +103,10 @@ export function StorySetup({ fontsRev }: { fontsRev: number | null }) {
   );
 }
 
-/** Cover and first inner page side by side, re-rendered live as settings change. */
+/** Live preview of the cover, labelled with the theme it is shown in. */
 function Preview({ fontsRev }: { fontsRev: number | null }) {
   const story = useEditor((s) => s.story);
-  const pages = allPages(story).slice(0, 2);
+  const pageCount = allPages(story).length;
   const { width, height } = FORMATS[story.format];
 
   const ref = useRef<HTMLDivElement>(null);
@@ -128,22 +119,19 @@ function Preview({ fontsRev }: { fontsRev: number | null }) {
     return () => ro.disconnect();
   }, []);
 
-  const gap = 12;
-  const maxH = boxW < 500 ? 260 : 440;
-  const scale = boxW ? Math.min((boxW - gap * (pages.length - 1)) / pages.length / width, maxH / height) : 0;
+  const maxH = boxW < 500 ? 300 : 460;
+  const scale = boxW ? Math.min(boxW / width, maxH / height) : 0;
 
   return (
-    <div ref={ref}>
-      <div className="flex justify-center" style={{ gap }}>
-        {fontsRev !== null &&
-          scale > 0 &&
-          pages.map((page, i) => (
-            <div key={page.id} className="shadow-[0_10px_30px_rgba(0,0,0,.15)]">
-              <PageStage page={page} theme={story.theme} format={story.format} storyName={story.name} pageNumber={i + 1} pageCount={allPages(story).length} scale={scale} fontsRev={fontsRev} />
-            </div>
-          ))}
-      </div>
-      <p className="mt-3 text-center text-xs text-neutral-400">Pré-visualização da capa e da primeira página</p>
+    <div ref={ref} className="flex justify-center pb-4">
+      {fontsRev !== null && scale > 0 && (
+        <div className="relative shadow-[0_10px_30px_rgba(0,0,0,.15)]">
+          <PageStage page={story.cover} theme={story.theme} format={story.format} storyName={story.name} pageNumber={1} pageCount={pageCount} scale={scale} fontsRev={fontsRev} />
+          <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 whitespace-nowrap rounded-full bg-neutral-900 px-3 py-1 text-xs font-medium text-white shadow-md dark:bg-white dark:text-neutral-900">
+            {story.theme.name}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

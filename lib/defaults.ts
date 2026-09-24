@@ -1,4 +1,4 @@
-import type { Story, StoryPage } from "@/types/story";
+import type { Story, StoryFormat, StoryPage } from "@/types/story";
 import { THEMES } from "@/lib/themes";
 import { uid } from "@/lib/uid";
 
@@ -6,11 +6,11 @@ export function newPage(): StoryPage {
   return { id: uid(), layout: "image-top-text-bottom", title: "Novo título", body: "Escreve aqui o texto desta página." };
 }
 
-export function blankStory(): Story {
+export function blankStory(format: StoryFormat): Story {
   return {
     id: uid(),
     name: "Sem título",
-    format: "4:5",
+    format,
     theme: THEMES[0],
     cover: { id: uid(), layout: "cover-title-only", title: "Título da capa", body: "Um subtítulo curto para a capa." },
     pages: [newPage()],

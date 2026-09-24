@@ -28,9 +28,3 @@ export const THEMES: Theme[] = [
 export const THEME_FONTS = [...new Set(THEMES.flatMap((t) => [t.fontHeading, t.fontBody]))];
 
 export const getTheme = (id: string) => THEMES.find((t) => t.id === id) ?? THEMES[0];
-
-/** Merges a page's partial override onto the story theme (colors merge key by key). */
-export function resolveTheme(base: Theme, override?: Partial<Theme>): Theme {
-  if (!override) return base;
-  return { ...base, ...override, colors: { ...base.colors, ...override.colors } };
-}

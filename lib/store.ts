@@ -24,7 +24,8 @@ type EditorState = {
   duplicatePage: (id: string) => void;
   deletePage: (id: string) => void;
   movePage: (id: string, toIndex: number) => void;
-  newStory: (withSample?: boolean) => void;
+  /** Blank story in the given format; the format is fixed at creation. */
+  newStory: (format: StoryFormat) => void;
 };
 
 /** Cover first, then the inner pages: the order pages are shown and exported in. */
@@ -85,10 +86,9 @@ export const useEditor = create<EditorState>()(
           pages.splice(Math.max(0, Math.min(toIndex, pages.length)), 0, page);
           set({ story: { ...story, pages } });
         },
-        newStory: (withSample) => {
-          const story = withSample ? sampleStory() : blankStory();
-          // A blank story starts at setup; the sample already has content, so it opens on the pages.
-          set({ story, selectedId: story.cover.id, step: withSample ? "edit" : "setup" });
+        newStory: (format) => {
+          const story = blankStory(format);
+          set({ story, selectedId: story.cover.id, step: "setup" });
         },
       };
     },

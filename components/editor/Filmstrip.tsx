@@ -8,7 +8,7 @@ import { registerStage } from "@/lib/stages";
 import { allPages, useEditor } from "@/lib/store";
 import { Icon } from "./Icon";
 
-const THUMB_H = 116;
+const THUMB_H = 58; // half the original 116, per request
 
 /** Memoised so typing on one page only redraws that page's thumbnail. */
 const ThumbStage = memo(function ThumbStage(props: PageRenderProps & { scale: number; fontsRev: number }) {
@@ -18,7 +18,7 @@ const ThumbStage = memo(function ThumbStage(props: PageRenderProps & { scale: nu
 export function Filmstrip({ fontsRev }: { fontsRev: number | null }) {
   const story = useEditor((s) => s.story);
   const selectedId = useEditor((s) => s.selectedId);
-  const { select, addPage, duplicatePage, deletePage, movePage } = useEditor.getState();
+  const { select, addPage, movePage } = useEditor.getState();
   const pages = allPages(story);
   const { width, height } = FORMATS[story.format];
   const scale = THUMB_H / height;
@@ -41,7 +41,7 @@ export function Filmstrip({ fontsRev }: { fontsRev: number | null }) {
 
   return (
     <div className="shrink-0 border-t border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
-      <div className="flex items-end gap-3 overflow-x-auto px-4 pb-3 pt-3">
+      <div className="flex items-end gap-1.5 overflow-x-auto px-3 pb-1.5 pt-1.5">
         {pages.map((page, i) => {
           const inner = i > 0;
           const innerIndex = i - 1;
@@ -76,7 +76,10 @@ export function Filmstrip({ fontsRev }: { fontsRev: number | null }) {
                 style={{ width: width * scale + 4 }}
                 title={inner ? `Página ${i + 1}` : "Capa"}
               >
-                <div className="overflow-hidden rounded-[3px] bg-neutral-200 dark:bg-neutral-800" style={{ height: THUMB_H }}>
+                <div
+                  className="overflow-hidden rounded-[3px] bg-neutral-200 outline outline-1 -outline-offset-1 outline-black/10 dark:bg-neutral-800 dark:outline-white/10"
+                  style={{ height: THUMB_H }}
+                >
                   {fontsRev !== null && (
                     <ThumbStage
                       page={page}
@@ -91,32 +94,19 @@ export function Filmstrip({ fontsRev }: { fontsRev: number | null }) {
                   )}
                 </div>
               </button>
-              <div className="mt-1 flex h-6 items-center justify-between gap-1 text-[11px] text-neutral-500">
-                <span className="pl-1 font-medium">{inner ? String(i + 1).padStart(2, "0") : "Capa"}</span>
-                {inner && selected && (
-                  <span className="flex">
-                    <button onClick={() => duplicatePage(page.id)} className="grid h-6 w-6 place-items-center rounded hover:bg-neutral-100 dark:hover:bg-neutral-800" title="Duplicar página">
-                      <Icon name="content_copy" className="!text-[16px]" />
-                    </button>
-                    <button onClick={() => deletePage(page.id)} className="grid h-6 w-6 place-items-center rounded text-red-600 hover:bg-red-50 dark:hover:bg-red-950" title="Apagar página">
-                      <Icon name="delete" className="!text-[16px]" />
-                    </button>
-                  </span>
-                )}
-              </div>
+              {/* Duplicate/delete live only in the page toolbar above the main canvas, not here. */}
+              <div className="mt-0.5 h-3.5 truncate pl-1 text-[10px] font-medium leading-[14px] text-neutral-500">{inner ? String(i + 1).padStart(2, "0") : "Capa"}</div>
             </div>
           );
         })}
         <button
           onClick={addPage}
-          className="mb-7 grid shrink-0 place-items-center rounded-md border-2 border-dashed border-neutral-300 text-neutral-500 hover:border-indigo-400 hover:text-indigo-600 dark:border-neutral-700"
-          style={{ width: Math.max(width * scale, 64), height: THUMB_H }}
+          className="mb-4 grid shrink-0 place-items-center rounded-md border-2 border-dashed border-neutral-300 text-neutral-500 hover:border-indigo-400 hover:text-indigo-600 dark:border-neutral-700"
+          style={{ width: Math.max(width * scale, 40), height: THUMB_H }}
           title="Adicionar página"
+          aria-label="Adicionar página"
         >
-          <span className="flex flex-col items-center gap-1 text-xs">
-            <Icon name="add" />
-            Página
-          </span>
+          <Icon name="add" className="!text-[18px]" />
         </button>
       </div>
     </div>
@@ -124,5 +114,5 @@ export function Filmstrip({ fontsRev }: { fontsRev: number | null }) {
 }
 
 function DropMark({ side }: { side: "left" | "right" }) {
-  return <div className={`absolute top-0 z-10 h-[120px] w-1 rounded bg-indigo-500 ${side === "left" ? "-left-2" : "-right-2"}`} />;
+  return <div className={`absolute top-0 z-10 h-[62px] w-1 rounded bg-indigo-500 ${side === "left" ? "-left-1.5" : "-right-1.5"}`} />;
 }

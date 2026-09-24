@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { getLayoutDef } from "@/components/story/layouts";
 import { resolveImageUrl } from "@/lib/images";
 import { allPages, useEditor } from "@/lib/store";
-import { resolveTheme, THEMES } from "@/lib/themes";
-import type { StoryPage, Theme } from "@/types/story";
+import type { StoryPage } from "@/types/story";
 import { Icon } from "./Icon";
 import { usePageImageUpload } from "./usePageImage";
 
@@ -24,12 +23,12 @@ export function Sidebar() {
 
   return (
     <aside className="w-full shrink-0 border-t border-neutral-200 bg-white md:w-80 md:overflow-y-auto md:border-l md:border-t-0 dark:border-neutral-800 dark:bg-neutral-900">
-      <PageSection page={page} index={index} storyTheme={story.theme} />
+      <PageSection page={page} index={index} />
     </aside>
   );
 }
 
-function PageSection({ page, index, storyTheme }: { page: StoryPage; index: number; storyTheme: Theme }) {
+function PageSection({ page, index }: { page: StoryPage; index: number }) {
   const updatePage = useEditor((s) => s.updatePage);
   const isCover = index === 0;
   const def = getLayoutDef(page.layout);
@@ -52,8 +51,6 @@ function PageSection({ page, index, storyTheme }: { page: StoryPage; index: numb
         </label>
       )}
       {def?.fields.image && <ImageField page={page} optional={def.fields.image === "optional"} />}
-
-      <PageThemeField page={page} storyTheme={storyTheme} />
     </section>
   );
 }
@@ -107,56 +104,3 @@ function ImageField({ page, optional }: { page: StoryPage; optional: boolean }) 
   );
 }
 
-const COLOR_FIELDS: [keyof Theme["colors"], string][] = [
-  ["background", "Fundo"],
-  ["text", "Texto"],
-  ["accent", "Destaque"],
-];
-
-/** Per-page theme override: pick another theme and/or tweak its three colours. */
-function PageThemeField({ page, storyTheme }: { page: StoryPage; storyTheme: Theme }) {
-  const updatePage = useEditor((s) => s.updatePage);
-  const resolved = resolveTheme(storyTheme, page.themeOverride);
-  const override = page.themeOverride;
-
-  return (
-    <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-800/60">
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-medium text-neutral-500">Tema desta página</span>
-        {override && (
-          <button onClick={() => updatePage(page.id, { themeOverride: undefined })} className="text-xs text-indigo-600 hover:underline dark:text-indigo-400">
-            Repor
-          </button>
-        )}
-      </div>
-      <select
-        className={field + " mb-3"}
-        value={override?.id ?? ""}
-        onChange={(e) => {
-          const t = THEMES.find((x) => x.id === e.target.value);
-          updatePage(page.id, { themeOverride: t ? { ...t } : undefined });
-        }}
-      >
-        <option value="">Igual ao Story ({storyTheme.name})</option>
-        {THEMES.filter((t) => t.id !== storyTheme.id).map((t) => (
-          <option key={t.id} value={t.id}>
-            {t.name}
-          </option>
-        ))}
-      </select>
-      <div className="grid grid-cols-3 gap-2">
-        {COLOR_FIELDS.map(([key, name]) => (
-          <label key={key} className="text-[11px] text-neutral-500">
-            {name}
-            <input
-              type="color"
-              className="mt-1 block h-8 w-full cursor-pointer rounded-md border border-neutral-200 bg-white p-0.5 dark:border-neutral-700 dark:bg-neutral-900"
-              value={resolved.colors[key]}
-              onChange={(e) => updatePage(page.id, { themeOverride: { ...override, colors: { ...resolved.colors, [key]: e.target.value } } })}
-            />
-          </label>
-        ))}
-      </div>
-    </div>
-  );
-}
