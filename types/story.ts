@@ -9,6 +9,9 @@ export type Theme = {
 export type PageLayout =
   | "cover-title-image"
   | "cover-title-only"
+  | "cover-split"
+  | "cover-minimal"
+  | "cover-frame"
   | "text-only"
   | "image-full-bleed"
   | "image-top-text-bottom"

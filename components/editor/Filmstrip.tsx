@@ -9,6 +9,8 @@ import { allPages, useEditor } from "@/lib/store";
 import { Icon } from "./Icon";
 
 const THUMB_H = 58; // half the original 116, per request
+// Thumbnail (58 + its ring padding) + label row + the row's own padding + border-top.
+export const FILMSTRIP_H = 92;
 
 /** Memoised so typing on one page only redraws that page's thumbnail. */
 const ThumbStage = memo(function ThumbStage(props: PageRenderProps & { scale: number; fontsRev: number }) {
@@ -40,7 +42,9 @@ export function Filmstrip({ fontsRev }: { fontsRev: number | null }) {
   };
 
   return (
-    <div className="shrink-0 border-t border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+    // Pinned to the viewport bottom on mobile, where the sidebar sits below it in the flow and
+    // would otherwise scroll it out of view; back to a normal, in-column position from md up.
+    <div className="fixed inset-x-0 bottom-0 z-10 shrink-0 border-t border-neutral-200 bg-white md:static dark:border-neutral-800 dark:bg-neutral-900">
       <div className="flex items-end gap-1.5 overflow-x-auto px-3 pb-1.5 pt-1.5">
         {pages.map((page, i) => {
           const inner = i > 0;

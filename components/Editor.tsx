@@ -11,6 +11,10 @@ import { pruneImages } from "@/lib/images";
 import { allPages, useEditor } from "@/lib/store";
 import { THEME_FONTS } from "@/lib/themes";
 
+// The sidebar's title/body fields are hidden for now: text is edited directly on the canvas.
+// Kept (not deleted) in case it comes back — flip this to show it again.
+const SHOW_SIDEBAR = false;
+
 export default function Editor() {
   const fontsRev = useFontsReady(THEME_FONTS);
   const step = useEditor((s) => s.step);
@@ -40,12 +44,14 @@ export default function Editor() {
       <Header ready={fontsRev !== null} />
       {step === "setup" && <StorySetup fontsRev={fontsRev} />}
       {/* Kept mounted (just hidden) during setup: exports render from the filmstrip's stages. */}
-      <div className={step === "edit" ? "flex min-h-0 flex-1 flex-col md:flex-row" : "hidden"}>
+      {/* pb-[92px] (matches Filmstrip.FILMSTRIP_H) reserves room for it: fixed to the bottom on
+          mobile, so it never covers the content above it; back in flow from md up. */}
+      <div className={step === "edit" ? "flex min-h-0 flex-1 flex-col pb-[92px] md:flex-row md:pb-0" : "hidden"}>
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <CanvasView fontsRev={fontsRev} />
           <Filmstrip fontsRev={fontsRev} />
         </div>
-        <Sidebar />
+        {SHOW_SIDEBAR && <Sidebar />}
       </div>
     </div>
   );

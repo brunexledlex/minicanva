@@ -23,6 +23,29 @@ export function LayoutIcon({ id, className = "h-[50px] w-[40px]" }: { id: PageLa
           <rect x="5" y="43" width="22" height="1.6" opacity=".55" />
         </>
       )}
+      {id === "cover-split" && (
+        <>
+          <rect width="40" height="28" opacity=".35" />
+          <rect x="5" y="32" width="10" height="1.6" opacity=".6" />
+          <rect x="5" y="36" width="26" height="4" />
+          <rect x="5" y="43" width="20" height="1.6" opacity=".55" />
+        </>
+      )}
+      {id === "cover-minimal" && (
+        <>
+          <rect x="15" y="12" width="10" height="1.6" opacity=".6" />
+          <rect x="8" y="18" width="24" height="5" />
+          <rect x="11" y="25" width="18" height="5" />
+          <rect x="12" y="34" width="16" height="1.6" opacity=".55" />
+        </>
+      )}
+      {id === "cover-frame" && (
+        <>
+          <rect x="4" y="4" width="32" height="22" opacity=".35" />
+          <rect x="6" y="30" width="24" height="4" />
+          <rect x="6" y="37" width="18" height="1.6" opacity=".55" />
+        </>
+      )}
       {id === "image-top-text-bottom" && (
         <>
           <rect width="40" height="25" opacity=".35" />

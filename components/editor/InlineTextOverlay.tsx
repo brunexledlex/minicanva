@@ -12,6 +12,8 @@ type Props = {
   /** Which field is being edited; the overlay unmounts (and its Text node reappears) when this is null. */
   field: EditableField | null;
   value: string;
+  /** Shown while the field is empty — the same label the canvas uses as ghost text. */
+  placeholder?: string;
   onChange: (value: string) => void;
   onClose: () => void;
   scale: number;
@@ -25,7 +27,7 @@ type Props = {
  * `editable`) while this is open, and re-measures on every keystroke since typing can reflow
  * the whole page (a taller title pushes the body down, etc).
  */
-export function InlineTextOverlay({ stage, field, value, onChange, onClose, scale, measureDeps }: Props) {
+export function InlineTextOverlay({ stage, field, value, placeholder, onChange, onClose, scale, measureDeps }: Props) {
   const [box, setBox] = useState<{ rect: Rect; font: FontStyle } | null>(null);
   const ref = useRef<HTMLTextAreaElement>(null);
 
@@ -108,9 +110,13 @@ export function InlineTextOverlay({ stage, field, value, onChange, onClose, scal
         if (e.key === "Escape") ref.current?.blur();
       }}
       onFocus={(e) => e.currentTarget.select()}
+      placeholder={placeholder}
       spellCheck={false}
-      className="absolute resize-none border-none bg-transparent p-0 outline-none"
-      style={{ ...box.rect, ...box.font, caretColor: box.font.color }}
+      // z-10: above the page, which carries a z-index (up to 2) while turning.
+      className="absolute z-10 resize-none border-none bg-transparent p-0 outline-none"
+      // An empty field was measured from its faded ghost text; don't carry that fade into
+      // the editor, or the placeholder and the first typed letters would be barely visible.
+      style={{ ...box.rect, ...box.font, opacity: value ? box.font.opacity : 1, caretColor: box.font.color }}
     />
   );
 }

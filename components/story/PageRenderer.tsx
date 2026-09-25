@@ -31,8 +31,12 @@ export function PageRenderer({ page, theme, format, storyName, pageNumber, pageC
     );
   }
   const { Component } = def;
+  // Placeholders only where fields can be edited (the main canvas passes onEditField); the
+  // labels are the layout's own names for its fields ("Título", "Citação", "Legenda"…).
+  const placeholders = onEditField ? { title: def.fields.title, body: def.fields.body } : undefined;
   return (
     <Component
+      placeholders={placeholders}
       page={page}
       theme={theme}
       width={width}

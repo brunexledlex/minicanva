@@ -1,4 +1,7 @@
 import type { PageLayout } from "@/types/story";
+import { CoverFrame } from "./coverFrame";
+import { CoverMinimal } from "./coverMinimal";
+import { CoverSplit } from "./coverSplit";
 import { CoverTitleImage } from "./coverTitleImage";
 import { CoverTitleOnly } from "./coverTitleOnly";
 import { ImageFullBleed } from "./imageFullBleed";
@@ -20,6 +23,9 @@ export type LayoutDef = {
 export const LAYOUT_DEFS: LayoutDef[] = [
   { id: "cover-title-image", name: "Capa com imagem", kind: "cover", fields: { title: "Título", body: "Subtítulo", image: "required" }, Component: CoverTitleImage },
   { id: "cover-title-only", name: "Capa tipográfica", kind: "cover", fields: { title: "Título", body: "Subtítulo" }, Component: CoverTitleOnly },
+  { id: "cover-split", name: "Capa dividida", kind: "cover", fields: { title: "Título", body: "Subtítulo", image: "required" }, Component: CoverSplit },
+  { id: "cover-minimal", name: "Capa centrada", kind: "cover", fields: { title: "Título", body: "Subtítulo" }, Component: CoverMinimal },
+  { id: "cover-frame", name: "Capa com moldura", kind: "cover", fields: { title: "Título", body: "Subtítulo", image: "required" }, Component: CoverFrame },
   { id: "image-top-text-bottom", name: "Imagem e texto", kind: "inner", fields: { title: "Título", body: "Texto", image: "required" }, Component: ImageTopTextBottom },
   { id: "text-only", name: "Só texto", kind: "inner", fields: { title: "Título", body: "Texto" }, Component: TextOnly },
   { id: "two-column", name: "Duas colunas", kind: "inner", fields: { title: "Título", body: "Texto", image: "optional" }, Component: TwoColumn },

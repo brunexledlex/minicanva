@@ -20,6 +20,16 @@ export function editable(field: EditableField, editingField: EditableField | nul
   };
 }
 
+/** Opacity for placeholder (ghost) text standing in for an empty field. */
+export const GHOST_OPACITY = 0.3;
+
+/** What to draw for a field: its value, or — when a placeholder is given — ghost text so an empty field stays double-clickable. */
+export function fieldText(value: string | undefined, placeholder: string | undefined) {
+  if (value) return { text: value, ghost: false };
+  if (placeholder) return { text: placeholder, ghost: true };
+  return { text: "", ghost: false };
+}
+
 /** Outer margin for a page, ~80px at 1080 wide. */
 export const margin = (W: number) => W * 0.074;
 

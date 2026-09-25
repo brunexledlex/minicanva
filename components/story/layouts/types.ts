@@ -17,6 +17,11 @@ export type LayoutProps = {
   editingField?: EditableField | null;
   /** Call when the title/body (or quote/author, dek, caption — whatever the layout calls them) text is double-clicked. */
   onEditField?: (field: EditableField) => void;
+  /**
+   * Ghost text for empty fields, so they still have something to double-click. Only set on the
+   * editable canvas — thumbnails and exports leave it out, so an empty field stays empty there.
+   */
+  placeholders?: Partial<Record<EditableField, string>>;
 };
 
 export type LayoutComponent = (props: LayoutProps) => JSX.Element;
