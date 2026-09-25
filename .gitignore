@@ -20,6 +20,9 @@
 .DS_Store
 *.pem
 
+# source PNGs for public/images — kept locally, not in the repo (see lib/defaults.ts)
+/Assets
+
 # debug
 npm-debug.log*
 yarn-debug.log*

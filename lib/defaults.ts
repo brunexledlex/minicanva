@@ -2,12 +2,18 @@ import type { Story, StoryFormat, StoryPage } from "@/types/story";
 import { THEMES } from "@/lib/themes";
 import { uid } from "@/lib/uid";
 
-// GitHub Pages serves this app from /minicanva/, so root-relative mock asset paths
+// GitHub Pages serves this app from /minicanva/, so root-relative public asset paths
 // need the same prefix Next.js applies to its own routes (see next.config.mjs).
-const mockAsset = (path: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path}`;
+const publicAsset = (path: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path}`;
+
+/** Built-in pattern images (public/images), used for covers and as the default image of new pages. */
+export const DEFAULT_IMAGES = Array.from({ length: 11 }, (_, i) => publicAsset(`/images/pattern-${String(i + 1).padStart(2, "0")}.jpg`));
+const pattern = (n: number) => DEFAULT_IMAGES[n - 1];
+/** A different default image each time, so new pages don't all look the same. */
+const randomImage = () => DEFAULT_IMAGES[Math.floor(Math.random() * DEFAULT_IMAGES.length)];
 
 export function newPage(): StoryPage {
-  return { id: uid(), layout: "image-top-text-bottom", title: "Novo título", body: "Escreve aqui o texto desta página." };
+  return { id: uid(), layout: "image-top-text-bottom", title: "Novo título", body: "Escreve aqui o texto desta página.", imageUrl: randomImage() };
 }
 
 export function blankStory(format: StoryFormat): Story {
@@ -16,7 +22,7 @@ export function blankStory(format: StoryFormat): Story {
     name: "Sem título",
     format,
     theme: THEMES[0],
-    cover: { id: uid(), layout: "cover-title-only", title: "Título da capa", body: "Um subtítulo curto para a capa." },
+    cover: { id: uid(), layout: "cover-title-image", title: "Título da capa", body: "Um subtítulo curto para a capa.", imageUrl: randomImage() },
     pages: [newPage()],
   };
 }
@@ -32,7 +38,7 @@ export function sampleStory(): Story {
       layout: "cover-title-image",
       title: "O regresso da tipografia editorial",
       body: "Porque é que os carrosséis estão a voltar a parecer revistas.",
-      imageUrl: mockAsset("/mock/landscape.svg"),
+      imageUrl: pattern(8),
     },
     pages: [
       {
@@ -41,7 +47,7 @@ export function sampleStory(): Story {
         title: "Quando a página volta a ser um objeto",
         body:
           "Durante anos, o feed tratou cada imagem como descartável. Agora, os carrosséis em formato de revista pedem outra atenção: margens generosas, hierarquia clara e um ritmo de leitura que convida a passar para a página seguinte.",
-        imageUrl: mockAsset("/mock/landscape.svg"),
+        imageUrl: pattern(2),
       },
       {
         id: uid(),
@@ -61,7 +67,7 @@ export function sampleStory(): Story {
         layout: "image-full-bleed",
         title: "Deixa a imagem falar",
         body: "Uma página inteira de imagem dá descanso entre blocos de texto.",
-        imageUrl: mockAsset("/mock/shapes.svg"),
+        imageUrl: pattern(9),
       },
       {
         id: uid(),
