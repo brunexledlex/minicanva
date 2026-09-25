@@ -4,6 +4,7 @@ import { Group, Rect, Text } from "react-konva";
 import { FORMATS } from "@/lib/formats";
 import type { StoryFormat, StoryPage, Theme } from "@/types/story";
 import { getLayoutDef } from "./layouts";
+import type { EditableField } from "./layouts/types";
 
 export type PageRenderProps = {
   page: StoryPage;
@@ -12,10 +13,12 @@ export type PageRenderProps = {
   storyName: string;
   pageNumber: number;
   pageCount: number;
+  editingField?: EditableField | null;
+  onEditField?: (field: EditableField) => void;
 };
 
 /** Draws one page at its native format size; the Stage handles display scaling. */
-export function PageRenderer({ page, theme, format, storyName, pageNumber, pageCount }: PageRenderProps) {
+export function PageRenderer({ page, theme, format, storyName, pageNumber, pageCount, editingField, onEditField }: PageRenderProps) {
   const { width, height } = FORMATS[format];
   const def = getLayoutDef(page.layout);
 
@@ -28,5 +31,17 @@ export function PageRenderer({ page, theme, format, storyName, pageNumber, pageC
     );
   }
   const { Component } = def;
-  return <Component page={page} theme={theme} width={width} height={height} pageNumber={pageNumber} pageCount={pageCount} storyName={storyName} />;
+  return (
+    <Component
+      page={page}
+      theme={theme}
+      width={width}
+      height={height}
+      pageNumber={pageNumber}
+      pageCount={pageCount}
+      storyName={storyName}
+      editingField={editingField}
+      onEditField={onEditField}
+    />
+  );
 }

@@ -3,7 +3,22 @@
 import Konva from "konva";
 import { Group, Image as KImage, Rect, Text } from "react-konva";
 import type { Theme } from "@/types/story";
+import type { EditableField } from "./layouts/types";
 import { useImage } from "./useImage";
+
+/**
+ * Props that make a title/body Text node double-click-editable on the main canvas:
+ * a `name` the CanvasView overlay can find and measure, hidden while its own edit
+ * session is open (an HTML textarea stands in for it), and a double-click to start.
+ */
+export function editable(field: EditableField, editingField: EditableField | null | undefined, onEditField: ((field: EditableField) => void) | undefined) {
+  return {
+    name: `editable-${field}`,
+    visible: editingField !== field,
+    onDblClick: () => onEditField?.(field),
+    onDblTap: () => onEditField?.(field),
+  };
+}
 
 /** Outer margin for a page, ~80px at 1080 wide. */
 export const margin = (W: number) => W * 0.074;

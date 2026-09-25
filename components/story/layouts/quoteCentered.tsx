@@ -1,12 +1,12 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { fitFontSize, Folio, folioTop, margin, measureText, safeInset } from "../primitives";
+import { editable, fitFontSize, Folio, folioTop, margin, measureText, safeInset } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Pull quote: oversized quotation mark, the quote (title) and its author (body), centred. */
 export const QuoteCentered: LayoutComponent = (props) => {
-  const { page, theme, width: W, height: H } = props;
+  const { page, theme, width: W, height: H, editingField, onEditField } = props;
   const { background, text, accent } = theme.colors;
   const m = margin(W);
   const qw = (W - m * 2) * 0.92;
@@ -33,11 +33,11 @@ export const QuoteCentered: LayoutComponent = (props) => {
     <Group>
       <Rect width={W} height={H} fill={background} />
       <Text x={0} y={top - markSize * 0.08} width={W} align="center" text="“" fontFamily={theme.fontHeading} fontStyle="bold" fontSize={markSize} lineHeight={1} fill={accent} />
-      {quote && <Text {...quoteBase} x={qx} y={quoteY} fontSize={quoteSize} fill={text} />}
+      {quote && <Text {...quoteBase} {...editable("title", editingField, onEditField)} x={qx} y={quoteY} fontSize={quoteSize} fill={text} />}
       {author && (
         <>
           <Rect x={W / 2 - W * 0.03} y={ruleY} width={W * 0.06} height={4} fill={accent} />
-          <Text {...authorCfg} x={qx} y={ruleY + 4 + gap} fill={text} opacity={0.7} />
+          <Text {...authorCfg} {...editable("body", editingField, onEditField)} x={qx} y={ruleY + 4 + gap} fill={text} opacity={0.7} />
         </>
       )}
       <Folio W={W} H={H} theme={theme} pageNumber={props.pageNumber} pageCount={props.pageCount} storyName={props.storyName} />

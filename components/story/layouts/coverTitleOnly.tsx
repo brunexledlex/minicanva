@@ -1,11 +1,11 @@
 "use client";
 
 import { Circle, Group, Rect, Text } from "react-konva";
-import { clampedHeight, fitFontSize, margin, Masthead, measureText, safeInset } from "../primitives";
+import { clampedHeight, editable, fitFontSize, margin, Masthead, measureText, safeInset } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Typographic cover: masthead, a large accent disc and an oversized title at the foot. */
-export const CoverTitleOnly: LayoutComponent = ({ page, theme, width: W, height: H, storyName }) => {
+export const CoverTitleOnly: LayoutComponent = ({ page, theme, width: W, height: H, storyName, editingField, onEditField }) => {
   const { background, text, accent } = theme.colors;
   const m = margin(W);
   const cw = W - m * 2;
@@ -32,8 +32,8 @@ export const CoverTitleOnly: LayoutComponent = ({ page, theme, width: W, height:
       <Rect width={W} height={H} fill={background} />
       <Circle x={W * 0.82} y={H * 0.3} radius={W * 0.3} fill={accent} />
       <Masthead W={W} H={H} theme={theme} storyName={storyName} color={text} />
-      {title && <Text {...titleBase} x={m} y={titleY} fontSize={titleSize} fill={text} />}
-      {dek && <Text {...dekCfg} x={m} y={dekY} height={dekH} fill={text} opacity={0.75} ellipsis />}
+      {title && <Text {...titleBase} {...editable("title", editingField, onEditField)} x={m} y={titleY} fontSize={titleSize} fill={text} />}
+      {dek && <Text {...dekCfg} {...editable("body", editingField, onEditField)} x={m} y={dekY} height={dekH} fill={text} opacity={0.75} ellipsis />}
       <Rect x={m} y={hintY + hintSize * 0.4} width={W * 0.08} height={4} fill={accent} />
       <Text x={m} y={hintY} width={cw} text="DESLIZA →" align="right" fontFamily={theme.fontBody} fontSize={hintSize} fontStyle="bold" letterSpacing={3} fill={text} opacity={0.7} />
     </Group>

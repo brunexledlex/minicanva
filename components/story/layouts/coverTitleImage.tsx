@@ -1,11 +1,11 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { clampedHeight, CoverImage, fitFontSize, margin, Masthead, measureText, safeInset, Shade } from "../primitives";
+import { clampedHeight, CoverImage, editable, fitFontSize, margin, Masthead, measureText, safeInset, Shade } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Photo cover: full-bleed image, masthead on top, big title and dek stacked from the bottom. */
-export const CoverTitleImage: LayoutComponent = ({ page, theme, width: W, height: H, storyName }) => {
+export const CoverTitleImage: LayoutComponent = ({ page, theme, width: W, height: H, storyName, editingField, onEditField }) => {
   const m = margin(W);
   const cw = W - m * 2;
   const white = "#ffffff";
@@ -35,8 +35,8 @@ export const CoverTitleImage: LayoutComponent = ({ page, theme, width: W, height
       <Shade W={W} y={H * 0.3} height={H * 0.7} from={0} to={0.8} />
       <Masthead W={W} H={H} theme={theme} storyName={storyName} color={white} />
       <Rect x={m} y={titleY - m * 0.35 - 8} width={W * 0.08} height={8} fill={theme.colors.accent} />
-      {title && <Text {...titleBase} x={m} y={titleY} fontSize={titleSize} fill={white} />}
-      {dek && <Text {...dekCfg} x={m} y={dekY} height={dekH} fill={white} opacity={0.88} ellipsis />}
+      {title && <Text {...titleBase} {...editable("title", editingField, onEditField)} x={m} y={titleY} fontSize={titleSize} fill={white} />}
+      {dek && <Text {...dekCfg} {...editable("body", editingField, onEditField)} x={m} y={dekY} height={dekH} fill={white} opacity={0.88} ellipsis />}
       <Text x={m} y={hintY} width={cw} text="DESLIZA →" align="right" fontFamily={theme.fontBody} fontSize={hintSize} fontStyle="bold" letterSpacing={3} fill={white} opacity={0.8} />
     </Group>
   );

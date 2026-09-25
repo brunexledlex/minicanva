@@ -1,12 +1,12 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { CoverImage, Folio, folioTop, margin, measureText, safeInset, splitColumns } from "../primitives";
+import { CoverImage, editable, Folio, folioTop, margin, measureText, safeInset, splitColumns } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Title across the top, optional image band, and the body flowing through two columns. */
 export const TwoColumn: LayoutComponent = (props) => {
-  const { page, theme, width: W, height: H } = props;
+  const { page, theme, width: W, height: H, editingField, onEditField } = props;
   const { background, text, accent } = theme.colors;
   const m = margin(W);
   const cw = W - m * 2;
@@ -33,13 +33,13 @@ export const TwoColumn: LayoutComponent = (props) => {
     <Group>
       <Rect width={W} height={H} fill={background} />
       <Rect x={m} y={accentY} width={W * 0.06} height={6} fill={accent} />
-      {title && <Text {...titleCfg} x={m} y={titleY} fill={text} />}
+      {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} x={m} y={titleY} fill={text} />}
       {imgH > 0 && <CoverImage src={page.imageUrl} x={m} y={imgY} width={cw} height={imgH} placeholder={accent} />}
-      {col1 && <Text {...bodyCfg} text={col1} x={m} y={colY} height={colH} fill={text} opacity={0.88} />}
+      {col1 && <Text {...bodyCfg} {...editable("body", editingField, onEditField)} text={col1} x={m} y={colY} height={colH} fill={text} opacity={0.88} />}
       {col2 && (
         <>
           <Rect x={m + colW + gutter / 2} y={colY} width={1} height={colH} fill={text} opacity={0.18} />
-          <Text {...bodyCfg} text={col2} x={m + colW + gutter} y={colY} height={colH} fill={text} opacity={0.88} ellipsis />
+          <Text {...bodyCfg} {...editable("body", editingField, onEditField)} text={col2} x={m + colW + gutter} y={colY} height={colH} fill={text} opacity={0.88} ellipsis />
         </>
       )}
       <Folio W={W} H={H} theme={theme} pageNumber={props.pageNumber} pageCount={props.pageCount} storyName={props.storyName} />

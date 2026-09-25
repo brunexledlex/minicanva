@@ -1,9 +1,12 @@
 "use client";
 
+import type Konva from "konva";
 import { useEffect, useRef, useState } from "react";
+import type { EditableField } from "@/components/story/layouts/types";
 import { PageStage } from "@/components/story/PageStage";
 import { FORMATS } from "@/lib/formats";
 import { allPages, useEditor } from "@/lib/store";
+import { InlineTextOverlay } from "./InlineTextOverlay";
 import { PageToolbar, TOOLBAR_H, TOOLBAR_MIN_W } from "./PageToolbar";
 import { PageToolsBar, TOOLS_BAR_H } from "./PageToolsBar";
 import { usePageImageUpload } from "./usePageImage";
@@ -12,10 +15,16 @@ import { usePageImageUpload } from "./usePageImage";
 export function CanvasView({ fontsRev }: { fontsRev: number | null }) {
   const story = useEditor((s) => s.story);
   const selectedId = useEditor((s) => s.selectedId);
+  const updatePage = useEditor((s) => s.updatePage);
   const pages = allPages(story);
   const index = Math.max(0, pages.findIndex((p) => p.id === selectedId));
   const page = pages[index];
   const { width, height } = FORMATS[story.format];
+
+  const stageRef = useRef<Konva.Stage | null>(null);
+  const [editingField, setEditingField] = useState<EditableField | null>(null);
+  // Leaving the page (by navigating, or because its layout dropped the field) closes any open editor.
+  useEffect(() => setEditingField(null), [page.id]);
 
   const boxRef = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState({ w: 0, h: 0 });
@@ -55,16 +64,29 @@ export function CanvasView({ fontsRev }: { fontsRev: number | null }) {
           // so this keeps the page and layout bar centred underneath it.
           <div className="flex flex-col items-center">
             <PageToolbar page={page} index={index} format={story.format} width={Math.max(width * scale, TOOLBAR_MIN_W)} />
-            <div className="shadow-[0_12px_40px_rgba(0,0,0,.18)]">
+            <div className="relative shadow-[0_12px_40px_rgba(0,0,0,.18)]">
               <PageStage
-              page={page}
-              theme={story.theme}
-              format={story.format}
-              storyName={story.name}
-              pageNumber={index + 1}
-              pageCount={pages.length}
-              scale={scale}
-              fontsRev={fontsRev}
+                stageRef={(s) => (stageRef.current = s)}
+                interactive
+                page={page}
+                theme={story.theme}
+                format={story.format}
+                storyName={story.name}
+                pageNumber={index + 1}
+                pageCount={pages.length}
+                scale={scale}
+                fontsRev={fontsRev}
+                editingField={editingField}
+                onEditField={setEditingField}
+              />
+              <InlineTextOverlay
+                stage={stageRef.current}
+                field={editingField}
+                value={(editingField === "title" ? page.title : editingField === "body" ? page.body : "") ?? ""}
+                onChange={(v) => updatePage(page.id, editingField === "title" ? { title: v } : { body: v })}
+                onClose={() => setEditingField(null)}
+                scale={scale}
+                measureDeps={[page.title, page.body, page.layout]}
               />
             </div>
             <PageToolsBar page={page} isCover={index === 0} width={width * scale} />

@@ -10,14 +10,16 @@ type Props = PageRenderProps & {
   /** Bumps when web fonts finish loading, so text is re-measured. */
   fontsRev: number;
   stageRef?: (stage: Konva.Stage | null) => void;
+  /** Enables pointer events, needed for double-click-to-edit; thumbnails and previews leave this off. */
+  interactive?: boolean;
 };
 
 /** A page drawn at native size inside a Stage scaled down for display. */
-export function PageStage({ scale, fontsRev, stageRef, ...page }: Props) {
+export function PageStage({ scale, fontsRev, stageRef, interactive, ...page }: Props) {
   const { width, height } = FORMATS[page.format];
   return (
-    <Stage ref={stageRef} width={width * scale} height={height * scale} scaleX={scale} scaleY={scale} listening={false}>
-      <Layer listening={false}>
+    <Stage ref={stageRef} width={width * scale} height={height * scale} scaleX={scale} scaleY={scale} listening={!!interactive}>
+      <Layer listening={!!interactive}>
         <PageRenderer key={fontsRev} {...page} />
       </Layer>
     </Stage>
