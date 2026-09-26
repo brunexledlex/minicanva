@@ -7,7 +7,7 @@ import { uid } from "@/lib/uid";
 const publicAsset = (path: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path}`;
 
 /** Built-in pattern images (public/images), used for covers and as the default image of new pages. */
-export const DEFAULT_IMAGES = Array.from({ length: 11 }, (_, i) => publicAsset(`/images/pattern-${String(i + 1).padStart(2, "0")}.jpg`));
+export const DEFAULT_IMAGES = Array.from({ length: 9 }, (_, i) => publicAsset(`/images/pattern-${String(i + 1).padStart(2, "0")}.jpg`));
 const pattern = (n: number) => DEFAULT_IMAGES[n - 1];
 /** A different default image each time, so new pages don't all look the same. */
 const randomImage = () => DEFAULT_IMAGES[Math.floor(Math.random() * DEFAULT_IMAGES.length)];
@@ -38,7 +38,7 @@ export function sampleStory(): Story {
       layout: "cover-title-image",
       title: "O regresso da tipografia editorial",
       body: "Porque é que os carrosséis estão a voltar a parecer revistas.",
-      imageUrl: pattern(8),
+      imageUrl: pattern(5), // blue-and-gold diagonal stripes
     },
     pages: [
       {
@@ -47,7 +47,7 @@ export function sampleStory(): Story {
         title: "Quando a página volta a ser um objeto",
         body:
           "Durante anos, o feed tratou cada imagem como descartável. Agora, os carrosséis em formato de revista pedem outra atenção: margens generosas, hierarquia clara e um ritmo de leitura que convida a passar para a página seguinte.",
-        imageUrl: pattern(2),
+        imageUrl: pattern(9), // green-and-purple marble swirl
       },
       {
         id: uid(),
@@ -67,7 +67,7 @@ export function sampleStory(): Story {
         layout: "image-full-bleed",
         title: "Deixa a imagem falar",
         body: "Uma página inteira de imagem dá descanso entre blocos de texto.",
-        imageUrl: pattern(9),
+        imageUrl: pattern(6), // teal squiggle
       },
       {
         id: uid(),
