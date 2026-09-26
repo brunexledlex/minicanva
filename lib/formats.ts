@@ -5,3 +5,5 @@ export const FORMATS: Record<StoryFormat, { width: number; height: number; label
   "4:5": { width: 1080, height: 1350, label: "Retrato" },
   "9:16": { width: 1080, height: 1920, label: "Story" },
 };
+
+export const FORMAT_KEYS = Object.keys(FORMATS) as StoryFormat[];

@@ -35,4 +35,10 @@ export type Story = {
   theme: Theme;
   cover: StoryPage;
   pages: StoryPage[];
+  /** Last edit (ms), for ordering the shelf. */
+  updatedAt: number;
+  /** Small render of the cover for the shelf, so it doesn't mount a Konva stage per story. */
+  coverThumbnailDataUrl?: string;
+  /** Fingerprint of what the thumbnail was rendered from; a mismatch means it's stale. */
+  coverThumbnailKey?: string;
 };

@@ -1,5 +1,5 @@
-import EditorClient from "@/components/EditorClient";
+import ShelfClient from "@/components/ShelfClient";
 
 export default function Home() {
-  return <EditorClient />;
+  return <ShelfClient />;
 }

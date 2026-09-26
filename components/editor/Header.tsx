@@ -1,13 +1,14 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { exportPagePng, exportPdf, exportZip } from "@/lib/export";
-import { FORMATS } from "@/lib/formats";
+import { FORMAT_KEYS, FORMATS } from "@/lib/formats";
+import { editorHref } from "@/lib/library";
 import { type Step, useEditor } from "@/lib/store";
 import type { StoryFormat } from "@/types/story";
 import { Icon } from "./Icon";
-
-const FORMAT_KEYS = Object.keys(FORMATS) as StoryFormat[];
 
 /** Outline of the format's proportions, for the "Novo" menu. */
 function FormatShape({ format }: { format: StoryFormat }) {
@@ -21,10 +22,14 @@ function FormatShape({ format }: { format: StoryFormat }) {
 
 export function Header({ ready }: { ready: boolean }) {
   const newStory = useEditor((s) => s.newStory);
+  const router = useRouter();
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-neutral-200 bg-white px-4 dark:border-neutral-800 dark:bg-neutral-900">
-      <span className="grid h-8 w-8 place-items-center rounded-lg bg-neutral-900 text-xs font-bold text-white dark:bg-white dark:text-neutral-900">mc</span>
+      <Link href="/" title="Voltar à estante" aria-label="Voltar à estante" className="-ml-1 flex items-center gap-0.5 rounded-lg p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800">
+        <Icon name="chevron_left" className="!text-[18px] text-neutral-500" />
+        <span className="grid h-8 w-8 place-items-center rounded-lg bg-neutral-900 text-xs font-bold text-white dark:bg-white dark:text-neutral-900">mc</span>
+      </Link>
       <span className="hidden font-semibold tracking-tight md:inline">minicanva</span>
       <Stepper />
       <div className="flex-1" />
@@ -32,14 +37,9 @@ export function Header({ ready }: { ready: boolean }) {
         label="Novo"
         icon="note_add"
         items={FORMAT_KEYS.map((f) => {
-            const { width, height, label } = FORMATS[f];
-            return {
-              label,
-              hint: `${f} · ${width}×${height}`,
-              icon: <FormatShape format={f} />,
-              onClick: () => confirm(`Começar um Story novo em ${label.toLowerCase()} (${f})? O atual é substituído.`) && newStory(f),
-            };
-          })}
+          const { width, height, label } = FORMATS[f];
+          return { label, hint: `${f} · ${width}×${height}`, icon: <FormatShape format={f} />, onClick: () => router.push(editorHref(newStory(f))) };
+        })}
       />
       <ExportMenu ready={ready} />
     </header>

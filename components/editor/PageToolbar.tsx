@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FORMATS } from "@/lib/formats";
+import { FORMAT_KEYS, FORMATS } from "@/lib/formats";
 import { useEditor } from "@/lib/store";
 import type { StoryFormat, StoryPage } from "@/types/story";
 import { Icon } from "./Icon";
@@ -28,8 +28,6 @@ export function PageToolbar({ page, index, format, width }: { page: StoryPage; i
     </div>
   );
 }
-
-const FORMAT_KEYS = Object.keys(FORMATS) as StoryFormat[];
 
 /** Small square outline matching a format's proportions. */
 function FormatShape({ format, size, active }: { format: StoryFormat; size: number; active?: boolean }) {

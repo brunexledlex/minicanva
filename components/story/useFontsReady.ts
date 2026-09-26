@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 
+/** Loads the regular, bold and italic faces the page layouts draw with. */
+export function loadFonts(families: string[]) {
+  return Promise.allSettled(families.flatMap((f) => ["400", "700", "italic 400"].map((w) => document.fonts.load(`${w} 40px "${f}"`))));
+}
+
 /**
  * Konva measures text when a node is created, so pages must wait for their
  * web fonts. Returns null until the fonts are loaded, then a revision number
@@ -15,10 +20,7 @@ export function useFontsReady(families: string[]) {
   useEffect(() => {
     let live = true;
     setRev(null);
-    const loads = key
-      .split("|")
-      .flatMap((f) => ["400", "700", "italic 400"].map((w) => document.fonts.load(`${w} 40px "${f}"`)));
-    Promise.allSettled(loads).then(() => live && setRev(0));
+    loadFonts(key.split("|")).then(() => live && setRev(0));
     const bump = () => live && setRev((r) => (r ?? 0) + 1);
     document.fonts.addEventListener("loadingdone", bump);
     return () => {
