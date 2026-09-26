@@ -1,10 +1,10 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { CoverImage, editable, fieldText, Folio, folioTop, GHOST_OPACITY, margin, measureText } from "../primitives";
+import { contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, margin, measureText } from "../primitives";
 import type { LayoutComponent } from "./types";
 
-/** Full-bleed image on the top half, then accent rule, title and body above the folio. */
+/** Full-bleed image on the top half, title and body below. */
 export const ImageTopTextBottom: LayoutComponent = (props) => {
   const { page, theme, width: W, height: H, editingField, onEditField, placeholders } = props;
   const { background, text, accent } = theme.colors;
@@ -17,17 +17,15 @@ export const ImageTopTextBottom: LayoutComponent = (props) => {
   const bodyF = fieldText(page.body, placeholders?.body);
   const body = bodyF.text;
   const titleCfg = { text: title, width: cw, fontFamily: theme.fontHeading, fontSize: W * 0.062, fontStyle: "bold", lineHeight: 1.08 };
-  const accentY = imgH + m * 0.9;
-  const titleY = accentY + 6 + m * 0.45;
+  const titleY = imgH + m * 0.9;
   const titleH = title ? measureText(titleCfg) : 0;
   const bodyY = titleY + titleH + m * 0.35;
-  const bodyH = Math.max(0, folioTop(W, H) - m * 0.4 - bodyY);
+  const bodyH = Math.max(0, contentBottom(W, H) - bodyY);
 
   return (
     <Group>
       <Rect width={W} height={H} fill={background} />
       <CoverImage src={page.imageUrl} x={0} y={0} width={W} height={imgH} placeholder={accent} />
-      <Rect x={m} y={accentY} width={W * 0.06} height={6} fill={accent} />
       {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fill={text} />}
       {body && bodyH > 0 && (
         <Text
@@ -45,7 +43,6 @@ export const ImageTopTextBottom: LayoutComponent = (props) => {
           ellipsis
         />
       )}
-      <Folio W={W} H={H} theme={theme} pageNumber={props.pageNumber} pageCount={props.pageCount} storyName={props.storyName} />
     </Group>
   );
 };

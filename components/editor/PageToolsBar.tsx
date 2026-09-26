@@ -1,9 +1,9 @@
 "use client";
 
-import { ImagePlus, LayoutTemplate } from "lucide-react";
+import { ImageOff, ImagePlus, LayoutTemplate, Loader2, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { LAYOUT_DEFS } from "@/components/story/layouts";
-import { resolveImageUrl } from "@/lib/images";
+import { DEFAULT_IMAGES } from "@/lib/defaults";
 import { useEditor } from "@/lib/store";
 import type { StoryPage } from "@/types/story";
 import { LayoutIcon } from "./LayoutIcon";
@@ -81,21 +81,23 @@ function TemplatesMenu({ page, layouts }: { page: StoryPage; layouts: typeof LAY
   );
 }
 
+/** A handful of the built-in patterns, offered as one-click presets. */
+const IMAGE_PRESETS = [DEFAULT_IMAGES[0], DEFAULT_IMAGES[2], DEFAULT_IMAGES[5], DEFAULT_IMAGES[7]];
+
+const swatch = "h-11 w-11 shrink-0 rounded-lg border";
+const swatchActive = "border-indigo-500 ring-2 ring-indigo-500";
+const swatchIdle = "border-neutral-200 dark:border-neutral-700";
+
 function ImageMenu({ page, optional }: { page: StoryPage; optional: boolean }) {
   const updatePage = useEditor((s) => s.updatePage);
   const { upload, busy, error } = usePageImageUpload();
   const { open, setOpen, ref } = useMenu();
   const input = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<string | null>(null);
 
-  useEffect(() => {
-    let live = true;
-    setPreview(null);
-    if (page.imageUrl) resolveImageUrl(page.imageUrl).then((u) => live && setPreview(u), () => {});
-    return () => {
-      live = false;
-    };
-  }, [page.imageUrl]);
+  const choose = (imageUrl: string | undefined) => {
+    updatePage(page.id, { imageUrl });
+    setOpen(false);
+  };
 
   return (
     <div ref={ref} className="relative">
@@ -104,25 +106,34 @@ function ImageMenu({ page, optional }: { page: StoryPage; optional: boolean }) {
         {page.imageUrl && <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-indigo-500" />}
       </button>
       {open && (
-        <div className="absolute bottom-full left-1/2 z-20 mb-2 w-64 -translate-x-1/2 rounded-xl border border-neutral-200 bg-white p-3 shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+        <div className="absolute bottom-full left-1/2 z-20 mb-2 w-56 -translate-x-1/2 rounded-xl border border-neutral-200 bg-white p-3 shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
           <p className="mb-2 text-xs font-medium text-neutral-500">Imagem{optional ? " (opcional)" : ""}</p>
-          <div className="flex items-center gap-3">
-            <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-lg bg-neutral-100 text-neutral-400 dark:bg-neutral-800">
-              {/* eslint-disable-next-line @next/next/no-img-element -- local blob/object URLs */}
-              {preview ? <img src={preview} alt="" className="h-full w-full object-cover" /> : <ImagePlus size={20} strokeWidth={1.5} />}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button onClick={() => input.current?.click()} disabled={busy} className="rounded-lg border border-neutral-200 px-3 py-1.5 text-sm hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-800">
-                {busy ? "A carregar…" : page.imageUrl ? "Trocar" : "Carregar"}
+          <div className="grid grid-cols-3 gap-2">
+            {IMAGE_PRESETS.map((src) => (
+              <button key={src} onClick={() => choose(src)} title="Usar esta imagem" className={`${swatch} ${page.imageUrl === src ? swatchActive : swatchIdle} overflow-hidden`}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- small local preset thumbnail */}
+                <img src={src} alt="" className="h-full w-full object-cover" />
               </button>
-              {page.imageUrl && (
-                <button onClick={() => updatePage(page.id, { imageUrl: undefined })} className="rounded-lg px-2 py-1.5 text-sm text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800">
-                  Remover
-                </button>
-              )}
-            </div>
+            ))}
+            <button
+              onClick={() => choose(undefined)}
+              title="Sem imagem"
+              aria-label="Sem imagem"
+              className={`${swatch} ${!page.imageUrl ? swatchActive : swatchIdle} grid place-items-center text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-white`}
+            >
+              <ImageOff size={18} strokeWidth={1.75} />
+            </button>
+            <button
+              onClick={() => input.current?.click()}
+              disabled={busy}
+              title="Carregar imagem"
+              aria-label="Carregar imagem"
+              className={`${swatch} ${swatchIdle} grid place-items-center text-neutral-500 hover:text-neutral-800 disabled:opacity-50 dark:text-neutral-400 dark:hover:text-white`}
+            >
+              {busy ? <Loader2 size={18} strokeWidth={1.75} className="animate-spin" /> : <Upload size={18} strokeWidth={1.75} />}
+            </button>
           </div>
-          <p className="mt-2 text-xs text-neutral-400">{error ?? "Também podes arrastar uma imagem para a página."}</p>
+          {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
           <input
             ref={input}
             type="file"
@@ -131,6 +142,7 @@ function ImageMenu({ page, optional }: { page: StoryPage; optional: boolean }) {
             onChange={(e) => {
               upload(page.id, e.target.files?.[0]);
               e.target.value = "";
+              setOpen(false);
             }}
           />
         </div>

@@ -1,8 +1,7 @@
 "use client";
 
 import Konva from "konva";
-import { Group, Image as KImage, Rect, Text } from "react-konva";
-import type { Theme } from "@/types/story";
+import { Image as KImage, Rect } from "react-konva";
 import type { EditableField } from "./layouts/types";
 import { useImage } from "./useImage";
 
@@ -104,36 +103,5 @@ export function Shade({ W, y, height, from = 0, to = 0.75, flip = false }: { W: 
   );
 }
 
-export const folioSize = (W: number) => W * 0.019;
-/** Top of the folio line at the bottom of an inner page; content should stop above it. */
-export const folioTop = (W: number, H: number) => H - safeInset(W, H) - margin(W) * 0.75 - folioSize(W) - margin(W) * 0.3;
-
-type FolioProps = { W: number; H: number; theme: Theme; pageNumber: number; pageCount: number; storyName: string; color?: string };
-
-/** Magazine running foot: hairline, "02 / 06" on the left, story name on the right. */
-export function Folio({ W, H, theme, pageNumber, pageCount, storyName, color = theme.colors.text }: FolioProps) {
-  const m = margin(W);
-  const size = folioSize(W);
-  const y = H - safeInset(W, H) - m * 0.75 - size;
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return (
-    <Group>
-      <Rect x={m} y={y - m * 0.3} width={W - m * 2} height={1.5} fill={color} opacity={0.22} />
-      <Text x={m} y={y} text={`${pad(pageNumber)} / ${pad(pageCount)}`} fontFamily={theme.fontBody} fontSize={size} fontStyle="bold" letterSpacing={2} fill={color} />
-      <Text x={m} y={y} width={W - m * 2} align="right" text={storyName.toUpperCase()} fontFamily={theme.fontBody} fontSize={size} letterSpacing={3} fill={color} opacity={0.6} />
-    </Group>
-  );
-}
-
-/** Story name as a masthead across the top of a cover. */
-export function Masthead({ W, H, theme, storyName, color }: { W: number; H: number; theme: Theme; storyName: string; color: string }) {
-  const m = margin(W);
-  const size = W * 0.04;
-  const y = m + safeInset(W, H);
-  return (
-    <Group>
-      <Text x={m} y={y} width={W - m * 2} text={storyName.toUpperCase()} fontFamily={theme.fontHeading} fontStyle="bold" fontSize={size} letterSpacing={W * 0.006} fill={color} wrap="none" ellipsis />
-      <Rect x={m} y={y + size * 1.5} width={W - m * 2} height={2} fill={color} opacity={0.5} />
-    </Group>
-  );
-}
+/** Bottom edge content should stop above, on an inner page (no footer reserved any more). */
+export const contentBottom = (W: number, H: number) => H - safeInset(W, H) - margin(W);

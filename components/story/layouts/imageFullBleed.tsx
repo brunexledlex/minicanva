@@ -1,7 +1,7 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { clampedHeight, CoverImage, editable, fieldText, Folio, folioTop, GHOST_OPACITY, margin, Shade } from "../primitives";
+import { clampedHeight, contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, margin, Shade } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Edge-to-edge photo with an optional title and caption over a bottom fade. */
@@ -11,7 +11,7 @@ export const ImageFullBleed: LayoutComponent = (props) => {
   const cw = W - m * 2;
   const white = "#ffffff";
 
-  let y = folioTop(W, H) - m * 0.5;
+  let y = contentBottom(W, H);
   const capF = fieldText(page.body, placeholders?.body);
   const caption = capF.text;
   const capCfg = { text: caption, width: cw, fontFamily: theme.fontBody, fontSize: W * 0.029, lineHeight: 1.4 };
@@ -34,7 +34,6 @@ export const ImageFullBleed: LayoutComponent = (props) => {
       <Shade W={W} y={hasText ? H * 0.4 : H * 0.7} height={hasText ? H * 0.6 : H * 0.3} from={0} to={hasText ? 0.78 : 0.5} />
       {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} height={titleH} fill={white} ellipsis />}
       {caption && <Text {...capCfg} {...editable("body", editingField, onEditField)} x={m} y={capY} height={capH} fill={white} opacity={capF.ghost ? GHOST_OPACITY : 0.88} ellipsis />}
-      <Folio W={W} H={H} theme={theme} pageNumber={props.pageNumber} pageCount={props.pageCount} storyName={props.storyName} color={white} />
     </Group>
   );
 };

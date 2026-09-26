@@ -1,20 +1,18 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { editable, fieldText, fitFontSize, Folio, folioTop, GHOST_OPACITY, margin, measureText, safeInset } from "../primitives";
+import { contentBottom, editable, fieldText, fitFontSize, GHOST_OPACITY, margin, measureText, safeInset } from "../primitives";
 import type { LayoutComponent } from "./types";
 
-/** Pull quote: oversized quotation mark, the quote (title) and its author (body), centred. */
+/** Pull quote: the quote (title) and its author (body), centred. */
 export const QuoteCentered: LayoutComponent = (props) => {
   const { page, theme, width: W, height: H, editingField, onEditField, placeholders } = props;
-  const { background, text, accent } = theme.colors;
+  const { background, text } = theme.colors;
   const m = margin(W);
   const qw = (W - m * 2) * 0.92;
   const qx = (W - qw) / 2;
-  const bottom = folioTop(W, H) - m * 0.4;
+  const bottom = contentBottom(W, H);
 
-  const markSize = W * 0.3;
-  const markH = markSize * 0.5; // the glyph sits in the top half of its line box
   const titleF = fieldText(page.title, placeholders?.title);
   const quote = titleF.text;
   const quoteBase = { text: quote, width: qw, fontFamily: theme.fontHeading, fontStyle: "italic", lineHeight: 1.22, align: "center", fontSize: W * 0.072 };
@@ -26,23 +24,16 @@ export const QuoteCentered: LayoutComponent = (props) => {
   const authorH = author ? measureText(authorCfg) : 0;
 
   const gap = m * 0.45;
-  const total = markH + gap + quoteH + (author ? gap + 4 + gap + authorH : 0);
+  const total = quoteH + (author ? gap + authorH : 0);
   const top = Math.max(m + safeInset(W, H), (bottom - total) / 2 + m * 0.2);
-  const quoteY = top + markH + gap;
-  const ruleY = quoteY + quoteH + gap;
+  const quoteY = top;
+  const authorY = quoteY + quoteH + gap;
 
   return (
     <Group>
       <Rect width={W} height={H} fill={background} />
-      <Text x={0} y={top - markSize * 0.08} width={W} align="center" text="“" fontFamily={theme.fontHeading} fontStyle="bold" fontSize={markSize} lineHeight={1} fill={accent} />
       {quote && <Text {...quoteBase} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={qx} y={quoteY} fontSize={quoteSize} fill={text} />}
-      {author && (
-        <>
-          <Rect x={W / 2 - W * 0.03} y={ruleY} width={W * 0.06} height={4} fill={accent} />
-          <Text {...authorCfg} {...editable("body", editingField, onEditField)} x={qx} y={ruleY + 4 + gap} fill={text} opacity={authorF.ghost ? GHOST_OPACITY : 0.7} />
-        </>
-      )}
-      <Folio W={W} H={H} theme={theme} pageNumber={props.pageNumber} pageCount={props.pageCount} storyName={props.storyName} />
+      {author && <Text {...authorCfg} {...editable("body", editingField, onEditField)} x={qx} y={authorY} fill={text} opacity={authorF.ghost ? GHOST_OPACITY : 0.7} />}
     </Group>
   );
 };
