@@ -5,13 +5,13 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { blankStory } from "@/lib/defaults";
 import { pruneImages } from "@/lib/images";
 import { uid } from "@/lib/uid";
-import type { Story, StoryFormat } from "@/types/story";
+import type { Story, StoryFormat, Theme } from "@/types/story";
 
 type LibraryState = {
   /** Every saved story, in no particular order; the shelf sorts them. */
   stories: Story[];
-  /** Adds a blank story (a cover and one inner page) and returns it. */
-  create: (format: StoryFormat) => Story;
+  /** Adds a blank story (a cover and one inner page, in this format, theme and name) and returns it. */
+  create: (format: StoryFormat, theme?: Theme, name?: string) => Story;
   /** Stores the editor's copy of a story. The thumbnail fields are the library's own and are kept. */
   save: (story: Story) => void;
   rename: (id: string, name: string) => void;
@@ -43,8 +43,8 @@ export const useLibrary = create<LibraryState>()(
       const patch = (id: string, fn: (s: Story) => Story) => set(({ stories }) => ({ stories: stories.map((s) => (s.id === id ? fn(s) : s)) }));
       return {
         stories: [],
-        create: (format) => {
-          const story = blankStory(format);
+        create: (format, theme, name) => {
+          const story = blankStory(format, theme, name);
           set(({ stories }) => ({ stories: [...stories, story] }));
           return story;
         },

@@ -138,8 +138,7 @@ function EmptyShelf({ onCreate }: { onCreate: () => void }) {
         </button>
         <div style={{ height: PLANK_H }} />
       </div>
-      <h1 className={`${serif} text-2xl font-bold tracking-tight md:text-3xl`}>A tua estante está vazia</h1>
-      <p className="mt-2 text-sm opacity-60">Cada Story que criares fica aqui, com a capa à vista, como numa revistaria.</p>
+      <h1 className={`${serif} text-2xl font-bold tracking-tight md:text-3xl`}>Estante vazia</h1>
       <button onClick={onCreate} className={`${btnPrimary} mt-6 flex items-center gap-1.5 pl-3`}>
         <Icon name="add" className="!text-[18px]" />
         Criar o primeiro Story

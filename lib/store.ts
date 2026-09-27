@@ -3,32 +3,24 @@
 import { create } from "zustand";
 import { blankStory, newPage } from "@/lib/defaults";
 import { useLibrary } from "@/lib/library";
-import { getTheme } from "@/lib/themes";
 import { uid } from "@/lib/uid";
-import type { Story, StoryFormat, StoryPage } from "@/types/story";
-
-export type Step = "setup" | "edit";
+import type { Story, StoryFormat, StoryPage, Theme } from "@/types/story";
 
 /** The story open in the editor. Not persisted itself: the editor saves every change to the library. */
 type EditorState = {
   story: Story;
   selectedId: string;
-  /** "setup" = name, format and theme (step 1); "edit" = the pages (step 2). */
-  step: Step;
   /** Opens a saved story on its pages, or, if it's the story already open, refreshes it in place. */
   load: (story: Story) => void;
-  setStep: (step: Step) => void;
   select: (id: string) => void;
-  setName: (name: string) => void;
   setFormat: (format: StoryFormat) => void;
-  setTheme: (themeId: string) => void;
   updatePage: (id: string, patch: Partial<StoryPage>) => void;
   addPage: () => void;
   duplicatePage: (id: string) => void;
   deletePage: (id: string) => void;
   movePage: (id: string, toIndex: number) => void;
-  /** Adds a blank story in the given format (fixed at creation) to the library and opens it on its setup step; returns its id. */
-  newStory: (format: StoryFormat) => string;
+  /** Adds a blank story in the given format, theme and name (fixed at creation) to the library and opens it on its pages; returns its id. */
+  newStory: (format: StoryFormat, theme?: Theme, name?: string) => string;
 };
 
 /** Cover first, then the inner pages: the order pages are shown and exported in. */
@@ -41,19 +33,14 @@ export const useEditor = create<EditorState>()((set, get) => {
   return {
     story: initial,
     selectedId: initial.cover.id,
-    step: "setup",
     load: (story) =>
-      set((st) =>
-        // Same story (e.g. one just created, waiting on its setup step): keep the step and page it's on.
-        st.story.id === story.id
-          ? { story, selectedId: allPages(story).some((p) => p.id === st.selectedId) ? st.selectedId : story.cover.id }
-          : { story, selectedId: story.cover.id, step: "edit" },
-      ),
-    setStep: (step) => set({ step }),
+      set((st) => ({
+        story,
+        // Same story (e.g. one just created): keep the page it's on.
+        selectedId: st.story.id === story.id && allPages(story).some((p) => p.id === st.selectedId) ? st.selectedId : story.cover.id,
+      })),
     select: (id) => set({ selectedId: id }),
-    setName: (name) => patchStory({ name }),
     setFormat: (format) => patchStory({ format }),
-    setTheme: (themeId) => patchStory({ theme: getTheme(themeId) }),
     updatePage: (id, patch) =>
       set(({ story }) => ({
         story:
@@ -95,9 +82,9 @@ export const useEditor = create<EditorState>()((set, get) => {
       pages.splice(Math.max(0, Math.min(toIndex, pages.length)), 0, page);
       set({ story: { ...story, pages } });
     },
-    newStory: (format) => {
-      const story = useLibrary.getState().create(format);
-      set({ story, selectedId: story.cover.id, step: "setup" });
+    newStory: (format, theme, name) => {
+      const story = useLibrary.getState().create(format, theme, name);
+      set({ story, selectedId: story.cover.id });
       return story.id;
     },
   };

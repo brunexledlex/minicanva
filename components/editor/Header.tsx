@@ -6,7 +6,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { exportPagePng, exportPdf, exportZip } from "@/lib/export";
 import { FORMAT_KEYS, FORMATS } from "@/lib/formats";
 import { editorHref } from "@/lib/library";
-import { type Step, useEditor } from "@/lib/store";
+import { useEditor } from "@/lib/store";
 import type { StoryFormat } from "@/types/story";
 import { Icon } from "./Icon";
 
@@ -31,7 +31,6 @@ export function Header({ ready }: { ready: boolean }) {
         <span className="grid h-8 w-8 place-items-center rounded-lg bg-neutral-900 text-xs font-bold text-white dark:bg-white dark:text-neutral-900">mc</span>
       </Link>
       <span className="hidden font-semibold tracking-tight md:inline">minicanva</span>
-      <Stepper />
       <div className="flex-1" />
       <Menu
         label="Novo"
@@ -43,43 +42,6 @@ export function Header({ ready }: { ready: boolean }) {
       />
       <ExportMenu ready={ready} />
     </header>
-  );
-}
-
-const STEPS: { id: Step; label: string }[] = [
-  { id: "setup", label: "Story" },
-  { id: "edit", label: "Páginas" },
-];
-
-/** 1 Story › 2 Páginas — both steps stay reachable at any time. */
-function Stepper() {
-  const step = useEditor((s) => s.step);
-  const setStep = useEditor((s) => s.setStep);
-  return (
-    <nav aria-label="Passos" className="flex items-center gap-0.5 md:ml-4">
-      {STEPS.map((st, i) => {
-        const active = st.id === step;
-        return (
-          <span key={st.id} className="flex items-center gap-0.5">
-            {i > 0 && <Icon name="chevron_right" className="!text-[16px] text-neutral-300 dark:text-neutral-600" />}
-            <button
-              onClick={() => setStep(st.id)}
-              aria-current={active ? "step" : undefined}
-              className={`flex h-8 items-center gap-1.5 rounded-lg px-2 text-sm ${active ? "font-medium" : "text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"}`}
-            >
-              <span
-                className={`grid h-5 w-5 place-items-center rounded-full text-[11px] font-semibold ${
-                  active ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900" : "bg-neutral-200 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300"
-                }`}
-              >
-                {i + 1}
-              </span>
-              {st.label}
-            </button>
-          </span>
-        );
-      })}
-    </nav>
   );
 }
 

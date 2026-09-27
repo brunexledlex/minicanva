@@ -19,7 +19,7 @@ export function Dialog({ open, onClose, title, children }: { open: boolean; onCl
       onClose={onClose}
       // A click on the dialog element itself (not its content) is a click on the backdrop.
       onClick={(e) => e.target === e.currentTarget && onClose()}
-      className="w-[min(calc(100vw-32px),400px)] rounded-2xl bg-white p-0 text-neutral-900 shadow-2xl backdrop:bg-black/40 dark:bg-neutral-900 dark:text-neutral-100"
+      className="max-h-[min(90vh,720px)] w-[min(calc(100vw-32px),400px)] overflow-y-auto rounded-2xl bg-white p-0 text-neutral-900 shadow-2xl backdrop:bg-black/40 dark:bg-neutral-900 dark:text-neutral-100"
     >
       {open && (
         <div className="p-5">
