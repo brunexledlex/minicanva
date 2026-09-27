@@ -18,12 +18,20 @@ export type PageLayout =
   | "quote-centered"
   | "two-column";
 
+/** The paper a page sits on; unset keeps the theme's own background. */
+export type PaperColor = "white" | "yellow";
+
+/** How a page's image fills its box: "fill" crops to cover it (the default); the rest fit the whole image in, anchored as named. */
+export type ImageFit = "fill" | "real" | "center" | "left" | "right";
+
 export type StoryPage = {
   id: string;
   layout: PageLayout;
   title?: string;
   body?: string;
   imageUrl?: string;
+  paper?: PaperColor;
+  imageFit?: ImageFit;
 };
 
 export type StoryFormat = "1:1" | "4:5" | "9:16";

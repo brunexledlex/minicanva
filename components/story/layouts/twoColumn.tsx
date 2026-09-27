@@ -1,13 +1,14 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, margin, measureText, safeInset, splitColumns } from "../primitives";
+import { contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, margin, measureText, paperFill, safeInset, splitColumns } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Title across the top, optional image band, and the body flowing through two columns. */
 export const TwoColumn: LayoutComponent = (props) => {
   const { page, theme, width: W, height: H, editingField, onEditField, placeholders } = props;
-  const { background, text, accent } = theme.colors;
+  const { text, accent } = theme.colors;
+  const paper = paperFill(page, theme);
   const m = margin(W);
   const cw = W - m * 2;
   const gutter = m * 0.55;
@@ -32,9 +33,9 @@ export const TwoColumn: LayoutComponent = (props) => {
 
   return (
     <Group>
-      <Rect width={W} height={H} fill={background} />
+      <Rect width={W} height={H} fill={paper} />
       {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fill={text} />}
-      {imgH > 0 && <CoverImage src={page.imageUrl} x={m} y={imgY} width={cw} height={imgH} placeholder={accent} />}
+      {imgH > 0 && <CoverImage src={page.imageUrl} x={m} y={imgY} width={cw} height={imgH} placeholder={accent} background={paper} fit={page.imageFit} />}
       {col1 && <Text {...bodyCfg} {...editable("body", editingField, onEditField)} text={col1} x={m} y={colY} height={colH} fill={text} opacity={bodyF.ghost ? GHOST_OPACITY : 0.88} />}
       {col2 && (
         <Text {...bodyCfg} {...editable("body", editingField, onEditField)} text={col2} x={m + colW + gutter} y={colY} height={colH} fill={text} opacity={bodyF.ghost ? GHOST_OPACITY : 0.88} ellipsis />

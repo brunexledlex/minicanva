@@ -1,13 +1,14 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, margin, measureText } from "../primitives";
+import { contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, margin, measureText, paperFill } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Full-bleed image on the top half, title and body below. */
 export const ImageTopTextBottom: LayoutComponent = (props) => {
   const { page, theme, width: W, height: H, editingField, onEditField, placeholders } = props;
-  const { background, text, accent } = theme.colors;
+  const { text, accent } = theme.colors;
+  const paper = paperFill(page, theme);
   const m = margin(W);
   const cw = W - m * 2;
   const imgH = Math.round(H * 0.5);
@@ -24,8 +25,8 @@ export const ImageTopTextBottom: LayoutComponent = (props) => {
 
   return (
     <Group>
-      <Rect width={W} height={H} fill={background} />
-      <CoverImage src={page.imageUrl} x={0} y={0} width={W} height={imgH} placeholder={accent} />
+      <Rect width={W} height={H} fill={paper} />
+      <CoverImage src={page.imageUrl} x={0} y={0} width={W} height={imgH} placeholder={accent} background={paper} fit={page.imageFit} />
       {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fill={text} />}
       {body && bodyH > 0 && (
         <Text

@@ -1,7 +1,7 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { clampedHeight, contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, margin, Shade } from "../primitives";
+import { clampedHeight, contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, margin, paperFill } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Edge-to-edge photo with an optional title and caption over a bottom fade. */
@@ -10,6 +10,7 @@ export const ImageFullBleed: LayoutComponent = (props) => {
   const m = margin(W);
   const cw = W - m * 2;
   const white = "#ffffff";
+  const paper = paperFill(page, theme);
 
   let y = contentBottom(W, H);
   const capF = fieldText(page.body, placeholders?.body);
@@ -25,13 +26,11 @@ export const ImageFullBleed: LayoutComponent = (props) => {
   const titleH = title ? clampedHeight(titleCfg, 4) : 0;
   if (title) y -= (caption ? m * 0.3 : 0) + titleH;
   const titleY = y;
-  const hasText = !!(title || caption);
 
   return (
     <Group>
-      <Rect width={W} height={H} fill={theme.colors.background} />
-      <CoverImage src={page.imageUrl} x={0} y={0} width={W} height={H} placeholder={theme.colors.accent} />
-      <Shade W={W} y={hasText ? H * 0.4 : H * 0.7} height={hasText ? H * 0.6 : H * 0.3} from={0} to={hasText ? 0.78 : 0.5} />
+      <Rect width={W} height={H} fill={paper} />
+      <CoverImage src={page.imageUrl} x={0} y={0} width={W} height={H} placeholder={theme.colors.accent} background={paper} fit={page.imageFit} />
       {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} height={titleH} fill={white} ellipsis />}
       {caption && <Text {...capCfg} {...editable("body", editingField, onEditField)} x={m} y={capY} height={capH} fill={white} opacity={capF.ghost ? GHOST_OPACITY : 0.88} ellipsis />}
     </Group>

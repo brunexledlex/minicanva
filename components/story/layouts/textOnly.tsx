@@ -1,13 +1,14 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { contentBottom, editable, fieldText, GHOST_OPACITY, margin, measureText, safeInset } from "../primitives";
+import { contentBottom, editable, fieldText, GHOST_OPACITY, margin, measureText, paperFill, safeInset } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** A reading page: title and a generous body column. */
 export const TextOnly: LayoutComponent = (props) => {
   const { page, theme, width: W, height: H, editingField, onEditField, placeholders } = props;
-  const { background, text } = theme.colors;
+  const { text } = theme.colors;
+  const paper = paperFill(page, theme);
   const m = margin(W);
   const cw = W - m * 2;
 
@@ -23,7 +24,7 @@ export const TextOnly: LayoutComponent = (props) => {
 
   return (
     <Group>
-      <Rect width={W} height={H} fill={background} />
+      <Rect width={W} height={H} fill={paper} />
       {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fill={text} />}
       {body && bodyH > 0 && (
         <Text

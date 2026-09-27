@@ -1,12 +1,13 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { clampedHeight, CoverImage, editable, fieldText, fitFontSize, GHOST_OPACITY, margin, measureText, safeInset } from "../primitives";
+import { clampedHeight, CoverImage, editable, fieldText, fitFontSize, GHOST_OPACITY, margin, measureText, paperFill, safeInset } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Split cover: photo on top, title and dek on a plain block below — no gradient or shading needed. */
 export const CoverSplit: LayoutComponent = ({ page, theme, width: W, height: H, editingField, onEditField, placeholders }) => {
-  const { background, text, accent } = theme.colors;
+  const { text, accent } = theme.colors;
+  const paper = paperFill(page, theme);
   const m = margin(W);
   const cw = W - m * 2;
   const imgH = Math.round(H * 0.56);
@@ -31,8 +32,8 @@ export const CoverSplit: LayoutComponent = ({ page, theme, width: W, height: H, 
 
   return (
     <Group>
-      <Rect width={W} height={H} fill={background} />
-      <CoverImage src={page.imageUrl} x={0} y={0} width={W} height={imgH} placeholder={accent} />
+      <Rect width={W} height={H} fill={paper} />
+      <CoverImage src={page.imageUrl} x={0} y={0} width={W} height={imgH} placeholder={accent} background={paper} fit={page.imageFit} />
       {title && <Text {...titleBase} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fontSize={titleSize} fill={text} />}
       {dek && <Text {...dekCfg} {...editable("body", editingField, onEditField)} x={m} y={dekY} height={dekH} fill={text} opacity={dekF.ghost ? GHOST_OPACITY : 0.75} ellipsis />}
     </Group>

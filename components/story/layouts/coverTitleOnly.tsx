@@ -1,12 +1,13 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { clampedHeight, editable, fieldText, fitFontSize, GHOST_OPACITY, margin, measureText, safeInset } from "../primitives";
+import { clampedHeight, editable, fieldText, fitFontSize, GHOST_OPACITY, margin, measureText, paperFill, safeInset } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Typographic cover: an oversized title stacked at the foot, no image. */
 export const CoverTitleOnly: LayoutComponent = ({ page, theme, width: W, height: H, editingField, onEditField, placeholders }) => {
-  const { background, text } = theme.colors;
+  const { text } = theme.colors;
+  const paper = paperFill(page, theme);
   const m = margin(W);
   const cw = W - m * 2;
 
@@ -29,7 +30,7 @@ export const CoverTitleOnly: LayoutComponent = ({ page, theme, width: W, height:
 
   return (
     <Group>
-      <Rect width={W} height={H} fill={background} />
+      <Rect width={W} height={H} fill={paper} />
       {title && <Text {...titleBase} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fontSize={titleSize} fill={text} />}
       {dek && <Text {...dekCfg} {...editable("body", editingField, onEditField)} x={m} y={dekY} height={dekH} fill={text} opacity={dekF.ghost ? GHOST_OPACITY : 0.75} ellipsis />}
     </Group>

@@ -1,7 +1,8 @@
 "use client";
 
 import Konva from "konva";
-import { Image as KImage, Rect } from "react-konva";
+import { Group, Image as KImage, Rect } from "react-konva";
+import type { ImageFit, PaperColor, StoryPage, Theme } from "@/types/story";
 import type { EditableField } from "./layouts/types";
 import { useImage } from "./useImage";
 
@@ -78,28 +79,52 @@ function coverCrop(iw: number, ih: number, w: number, h: number) {
   return { x: 0, y: (ih - ch) / 2, width: iw, height: ch };
 }
 
-type CoverImageProps = { src?: string; x: number; y: number; width: number; height: number; placeholder: string };
+/** Colour swatches the "Papel" picker offers; a page with no override uses its theme's own background. */
+export const PAPER_COLORS: Record<PaperColor, string> = { white: "#ffffff", yellow: "#fbf0d1" };
 
-export function CoverImage({ src, x, y, width, height, placeholder }: CoverImageProps) {
-  const img = useImage(src);
-  if (!img) return <Rect x={x} y={y} width={width} height={height} fill={placeholder} opacity={0.18} />;
-  const crop = coverCrop(img.naturalWidth || img.width, img.naturalHeight || img.height, width, height);
-  return <KImage image={img} x={x} y={y} width={width} height={height} crop={crop} />;
+/** A page's background: its own paper override, or the theme's. Used both for the base fill and to letterbox an image that doesn't fill its box. */
+export function paperFill(page: StoryPage, theme: Theme) {
+  return page.paper ? PAPER_COLORS[page.paper] : theme.colors.background;
 }
 
-/** Vertical fade to black, used to keep white text legible over photos. */
-export function Shade({ W, y, height, from = 0, to = 0.75, flip = false }: { W: number; y: number; height: number; from?: number; to?: number; flip?: boolean }) {
-  const stops = flip ? [0, `rgba(0,0,0,${to})`, 1, `rgba(0,0,0,${from})`] : [0, `rgba(0,0,0,${from})`, 1, `rgba(0,0,0,${to})`];
+type CoverImageProps = {
+  src?: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  /** Shown, tinted, when no image is set at all. */
+  placeholder: string;
+  /** The page's own background, shown behind an image that doesn't fill the whole box. */
+  background: string;
+  fit?: ImageFit;
+};
+
+/** A page's image, drawn according to its fit mode ("fill" — crop to cover, the default — or the whole image placed at its natural or a contained size). */
+export function CoverImage({ src, x, y, width, height, placeholder, background, fit = "fill" }: CoverImageProps) {
+  const img = useImage(src);
+  if (!img) return <Rect x={x} y={y} width={width} height={height} fill={placeholder} opacity={0.18} />;
+  const iw = img.naturalWidth || img.width;
+  const ih = img.naturalHeight || img.height;
+
+  if (fit === "fill") {
+    const crop = coverCrop(iw, ih, width, height);
+    return <KImage image={img} x={x} y={y} width={width} height={height} crop={crop} />;
+  }
+
+  // "real": the image at its native pixel size. Otherwise scaled down (never up) to fit
+  // entirely inside the box, then anchored per `fit`. Either way, the box may show more of
+  // the page's own background than the image covers, so it's filled first and clipped.
+  const scale = fit === "real" ? 1 : Math.min(width / iw, height / ih, 1);
+  const dw = iw * scale;
+  const dh = ih * scale;
+  const dx = fit === "left" ? x : fit === "right" ? x + (width - dw) : x + (width - dw) / 2;
+  const dy = y + (height - dh) / 2;
   return (
-    <Rect
-      x={0}
-      y={y}
-      width={W}
-      height={height}
-      fillLinearGradientStartPoint={{ x: 0, y: 0 }}
-      fillLinearGradientEndPoint={{ x: 0, y: height }}
-      fillLinearGradientColorStops={stops}
-    />
+    <Group clipX={x} clipY={y} clipWidth={width} clipHeight={height}>
+      <Rect x={x} y={y} width={width} height={height} fill={background} />
+      <KImage image={img} x={dx} y={dy} width={dw} height={dh} />
+    </Group>
   );
 }
 
