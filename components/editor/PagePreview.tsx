@@ -1,17 +1,10 @@
 "use client";
 
-import type Konva from "konva";
 import { AnimatePresence, motion, type PanInfo, useReducedMotion, type Variants } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { getLayoutDef } from "@/components/story/layouts";
-import type { EditableField } from "@/components/story/layouts/types";
 import { PageStage } from "@/components/story/PageStage";
 import { FORMATS } from "@/lib/formats";
 import { allPages, useEditor } from "@/lib/store";
-import { InlineTextOverlay } from "./InlineTextOverlay";
-import { PageToolbar, TOOLBAR_H, TOOLBAR_MIN_W } from "./PageToolbar";
-import { PageToolsBar, TOOLS_BAR_H } from "./PageToolsBar";
-import { usePageImageUpload } from "./usePageImage";
 
 /**
  * Magazine page turn, pivoting on the left edge (the spine). Going forward, the current page
@@ -29,7 +22,7 @@ const TURN: Variants = {
 /**
  * Perspective distance, in page widths. The turning edge comes up to one page width toward the
  * viewer, so it grows by p / (p − 1): 12 → at most ~9% (≈8% at 60°) — enough to sell the lift
- * without the page ballooning over the toolbars (3 gave ~40%).
+ * without the page ballooning over the bars (3 gave ~40%).
  */
 const TURN_PERSPECTIVE = 12;
 /** For people who've asked their OS for reduced motion: a plain crossfade instead of the turn. */
@@ -39,11 +32,14 @@ const FADE: Variants = { enter: { opacity: 0 }, center: { opacity: 1 }, exit: { 
 const SWIPE_DISTANCE = 50;
 const SWIPE_VELOCITY = 500;
 
-/** The large preview of the selected page, fitted to the available space. */
-export function CanvasView({ fontsRev }: { fontsRev: number | null }) {
+/** The Edit button's size; it overhangs the page's bottom-right corner, so the page leaves room for part of it. */
+const EDIT_SIZE = 72;
+const EDIT_OVERHANG = 24;
+
+/** The story screen's large, read-only view of the selected page: swipe to turn pages, "Editar" to edit it. */
+export function PagePreview({ fontsRev, onEdit }: { fontsRev: number | null; onEdit: () => void }) {
   const story = useEditor((s) => s.story);
   const selectedId = useEditor((s) => s.selectedId);
-  const updatePage = useEditor((s) => s.updatePage);
   const select = useEditor((s) => s.select);
   const pages = allPages(story);
   const index = Math.max(0, pages.findIndex((p) => p.id === selectedId));
@@ -60,15 +56,8 @@ export function CanvasView({ fontsRev }: { fontsRev: number | null }) {
     setDir(index > shownIndex ? 1 : -1);
   }
 
-  const stageRef = useRef<Konva.Stage | null>(null);
-  const [editingField, setEditingField] = useState<EditableField | null>(null);
-  // Leaving the page (by navigating, or because its layout dropped the field) closes any open editor.
-  useEffect(() => setEditingField(null), [page.id]);
-
-  // Swipe left for the next page, right for the previous — only mostly-horizontal drags, and
-  // not while editing text (selecting text in the editor would otherwise turn the page).
+  // Swipe left for the next page, right for the previous — only mostly-horizontal drags.
   const onPanEnd = (_: PointerEvent, info: PanInfo) => {
-    if (editingField) return;
     const { offset, velocity } = info;
     if (Math.abs(offset.x) < Math.abs(offset.y)) return;
     if (Math.abs(offset.x) < SWIPE_DISTANCE && Math.abs(velocity.x) < SWIPE_VELOCITY) return;
@@ -85,43 +74,17 @@ export function CanvasView({ fontsRev }: { fontsRev: number | null }) {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  // The toolbar sits above the page and the tools bar below it; the page gets the height left over.
-  // The page itself only fills 95% of that, leaving a little breathing room around it.
-  const chrome = TOOLBAR_H + TOOLS_BAR_H;
-  const fit = box.w && box.h > chrome ? Math.min(box.w / width, (box.h - chrome) / height, 1) : 0;
-  const scale = fit * 0.95;
-
-  const { upload } = usePageImageUpload();
-  const [dropping, setDropping] = useState(false);
+  const room = EDIT_OVERHANG;
+  const scale = box.w > room && box.h > room ? Math.min((box.w - room) / width, (box.h - room) / height, 1) * 0.95 : 0;
 
   return (
-    <div
-      className="relative min-h-[55vh] flex-1 md:min-h-0"
-      onDragOver={(e) => {
-        if (!e.dataTransfer.types.includes("Files")) return;
-        e.preventDefault();
-        setDropping(true);
-      }}
-      onDragLeave={() => setDropping(false)}
-      onDrop={(e) => {
-        e.preventDefault();
-        setDropping(false);
-        upload(page.id, e.dataTransfer.files[0]);
-      }}
-    >
-      {/* Absolutely positioned so its size is definite even when the parent only has a min-height (mobile). */}
-      <div ref={boxRef} className="absolute inset-5 flex items-center justify-center md:inset-10">
+    <div className="relative min-h-0 flex-1">
+      {/* Absolutely positioned so its size is definite whatever the column around it does. */}
+      <div ref={boxRef} className="absolute inset-4 flex items-center justify-center md:inset-8">
         {scale > 0 && fontsRev !== null ? (
-          // items-center: the toolbar can be wider than the page (it has a minimum width),
-          // so this keeps the page and layout bar centred underneath it.
-          <div className="flex flex-col items-center">
-            <PageToolbar page={page} index={index} format={story.format} width={Math.max(width * scale, TOOLBAR_MIN_W)} />
+          <div className="relative" style={{ width: width * scale, height: height * scale }}>
             {/* Receives the swipe. pan-y keeps vertical scrolling on touch screens; horizontal drags come here. */}
-            <motion.div
-              className="relative"
-              style={{ width: width * scale, height: height * scale, perspective: width * scale * TURN_PERSPECTIVE, touchAction: "pan-y" }}
-              onPanEnd={onPanEnd}
-            >
+            <motion.div className="relative h-full w-full" style={{ perspective: width * scale * TURN_PERSPECTIVE, touchAction: "pan-y" }} onPanEnd={onPanEnd}>
               {/* During a turn the old and new page are both mounted, stacked in the same spot. */}
               <AnimatePresence initial={false} custom={dir}>
                 <motion.div
@@ -136,12 +99,6 @@ export function CanvasView({ fontsRev }: { fontsRev: number | null }) {
                   style={{ transformOrigin: "left center", backfaceVisibility: "hidden" }}
                 >
                   <PageStage
-                    // Only ever set, never cleared: the outgoing page's stage unmounts after the
-                    // incoming one has mounted, and clearing then would drop the live stage.
-                    stageRef={(s) => {
-                      if (s) stageRef.current = s;
-                    }}
-                    interactive
                     page={page}
                     theme={story.theme}
                     format={story.format}
@@ -150,34 +107,22 @@ export function CanvasView({ fontsRev }: { fontsRev: number | null }) {
                     pageCount={pages.length}
                     scale={scale}
                     fontsRev={fontsRev}
-                    editingField={editingField}
-                    onEditField={setEditingField}
                   />
                 </motion.div>
               </AnimatePresence>
-              <InlineTextOverlay
-                stage={stageRef.current}
-                field={editingField}
-                value={(editingField === "title" ? page.title : editingField === "body" ? page.body : "") ?? ""}
-                placeholder={editingField ? getLayoutDef(page.layout)?.fields[editingField] : undefined}
-                onChange={(v) => updatePage(page.id, editingField === "title" ? { title: v } : { body: v })}
-                onClose={() => setEditingField(null)}
-                scale={scale}
-                measureDeps={[page.title, page.body, page.layout]}
-              />
             </motion.div>
-            <PageToolsBar page={page} isCover={index === 0} width={width * scale} />
+            <button
+              onClick={onEdit}
+              className="absolute z-10 grid place-items-center rounded-full bg-[#1b1a17] text-sm font-semibold text-[#a3ffa3] shadow-[0_8px_24px_rgba(0,0,0,.3)] transition-transform hover:scale-105 active:scale-95"
+              style={{ width: EDIT_SIZE, height: EDIT_SIZE, right: -EDIT_OVERHANG, bottom: -EDIT_OVERHANG }}
+            >
+              Editar
+            </button>
           </div>
         ) : (
           <p className="text-sm text-neutral-500">A carregar…</p>
         )}
       </div>
-
-      {dropping && (
-        <div className="pointer-events-none absolute inset-3 grid place-items-center rounded-2xl border-2 border-dashed border-indigo-500 bg-indigo-500/10 text-sm font-medium text-indigo-600">
-          Larga a imagem para a usar nesta página
-        </div>
-      )}
     </div>
   );
 }

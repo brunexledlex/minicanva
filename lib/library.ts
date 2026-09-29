@@ -79,6 +79,9 @@ export const useLibrary = create<LibraryState>()(
 );
 
 export const editorHref = (id: string) => `/editor/?id=${encodeURIComponent(id)}`;
+/** The edit screen for one page. `fromStory`: opened from the story screen, so leaving it can simply go back. */
+export const editPageHref = (id: string, pageId: string, fromStory = true) =>
+  `/editor/edit/?id=${encodeURIComponent(id)}&page=${encodeURIComponent(pageId)}${fromStory ? "&from=story" : ""}`;
 
 /** Deletes uploaded images that no page of any story uses any more (replaced images, deleted pages or stories). */
 export function pruneUnusedImages() {

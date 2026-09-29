@@ -2,41 +2,26 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { CanvasView } from "@/components/editor/CanvasView";
 import { Filmstrip } from "@/components/editor/Filmstrip";
-import { Header } from "@/components/editor/Header";
+import { PagePreview } from "@/components/editor/PagePreview";
 import { Sidebar } from "@/components/editor/Sidebar";
+import { StoryTopBar } from "@/components/editor/StoryTopBar";
+import { useStoryLoader } from "@/components/editor/useStoryLoader";
 import { useFontsReady } from "@/components/story/useFontsReady";
-import { pruneUnusedImages, useLibrary } from "@/lib/library";
+import { editPageHref, pruneUnusedImages } from "@/lib/library";
 import { allPages, useEditor } from "@/lib/store";
 import { THEME_FONTS } from "@/lib/themes";
-import { scheduleThumbnail } from "@/lib/thumbnails";
 
 // The sidebar's title/body fields are hidden for now: text is edited directly on the canvas.
 // Kept (not deleted) in case it comes back — flip this to show it again.
 const SHOW_SIDEBAR = false;
 
+/** The story screen: the selected page large (swipe to turn), page actions on top, every page along the bottom. */
 export default function Editor() {
   const fontsRev = useFontsReady(THEME_FONTS);
   const router = useRouter();
   const id = useSearchParams().get("id");
-  const loaded = useEditor((s) => s.story.id === id);
-
-  useEffect(() => {
-    const story = useLibrary.getState().stories.find((s) => s.id === id);
-    if (!story) {
-      router.replace("/");
-      return;
-    }
-    // Always from the library: the shelf may have renamed it since it was last open here.
-    useEditor.getState().load(story);
-    // Every edit goes straight to the library, and may call for a new shelf thumbnail.
-    return useEditor.subscribe((s, prev) => {
-      if (s.story === prev.story) return;
-      useLibrary.getState().save(s.story);
-      scheduleThumbnail(s.story.id);
-    });
-  }, [id, router]);
+  const loaded = useStoryLoader(id);
 
   useEffect(() => {
     pruneUnusedImages();
@@ -56,20 +41,21 @@ export default function Editor() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  const edit = () => {
+    const { story, selectedId } = useEditor.getState();
+    router.push(editPageHref(story.id, selectedId));
+  };
+
   return (
-    <div className="flex min-h-dvh flex-col bg-neutral-100 text-neutral-900 md:h-dvh dark:bg-neutral-950 dark:text-neutral-100">
+    <div className="flex h-dvh flex-col bg-[#ececec] text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
       {loaded && (
         <>
-          <Header ready={fontsRev !== null} />
-          {/* pb-[92px] (matches Filmstrip.FILMSTRIP_H) reserves room for it: fixed to the bottom on
-              mobile, so it never covers the content above it; back in flow from md up. */}
-          <div className="flex min-h-0 flex-1 flex-col pb-[92px] md:flex-row md:pb-0">
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-              <CanvasView fontsRev={fontsRev} />
-              <Filmstrip fontsRev={fontsRev} />
-            </div>
+          <StoryTopBar ready={fontsRev !== null} onEdit={edit} />
+          <div className="flex min-h-0 flex-1 md:flex-row">
+            <PagePreview fontsRev={fontsRev} onEdit={edit} />
             {SHOW_SIDEBAR && <Sidebar />}
           </div>
+          <Filmstrip fontsRev={fontsRev} />
         </>
       )}
     </div>

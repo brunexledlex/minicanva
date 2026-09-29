@@ -1,22 +1,24 @@
 "use client";
 
+import { Plus } from "lucide-react";
+import Link from "next/link";
 import { memo, useState } from "react";
 import { PageStage } from "@/components/story/PageStage";
 import type { PageRenderProps } from "@/components/story/PageRenderer";
 import { FORMATS } from "@/lib/formats";
 import { registerStage } from "@/lib/stages";
 import { allPages, useEditor } from "@/lib/store";
-import { Icon } from "./Icon";
 
-const THUMB_H = 58; // half the original 116, per request
-// Thumbnail (58 + its ring padding) + label row + the row's own padding + border-top.
-export const FILMSTRIP_H = 92;
+const THUMB_H = 58;
+/** A thumbnail's button: the thumbnail plus its 2px selection-ring padding on each side. */
+const THUMB_BOX_H = THUMB_H + 4;
 
 /** Memoised so typing on one page only redraws that page's thumbnail. */
 const ThumbStage = memo(function ThumbStage(props: PageRenderProps & { scale: number; fontsRev: number }) {
   return <PageStage {...props} stageRef={(s) => registerStage(props.page.id, s)} />;
 });
 
+/** The story screen's bottom bar: back to the shelf, then every page (tap to show, drag to reorder) and a button to add one. */
 export function Filmstrip({ fontsRev }: { fontsRev: number | null }) {
   const story = useEditor((s) => s.story);
   const selectedId = useEditor((s) => s.selectedId);
@@ -42,10 +44,15 @@ export function Filmstrip({ fontsRev }: { fontsRev: number | null }) {
   };
 
   return (
-    // Pinned to the viewport bottom on mobile, where the sidebar sits below it in the flow and
-    // would otherwise scroll it out of view; back to a normal, in-column position from md up.
-    <div className="fixed inset-x-0 bottom-0 z-10 shrink-0 border-t border-neutral-200 bg-white md:static dark:border-neutral-800 dark:bg-neutral-900">
-      <div className="flex items-end gap-1.5 overflow-x-auto px-3 pb-1.5 pt-1.5">
+    <div className="flex shrink-0 items-start gap-3 border-t border-neutral-200 bg-white py-2 pl-3 dark:border-neutral-800 dark:bg-neutral-900">
+      <Link
+        href="/"
+        className="grid shrink-0 place-items-center rounded-xl bg-[#a3ffa3] px-5 text-sm font-semibold text-[#1b1a17] hover:brightness-95"
+        style={{ height: THUMB_BOX_H }}
+      >
+        Voltar
+      </Link>
+      <div className="flex min-w-0 flex-1 items-start gap-1.5 overflow-x-auto pr-3">
         {pages.map((page, i) => {
           const inner = i > 0;
           const innerIndex = i - 1;
@@ -98,19 +105,18 @@ export function Filmstrip({ fontsRev }: { fontsRev: number | null }) {
                   )}
                 </div>
               </button>
-              {/* Duplicate/delete live only in the page toolbar above the main canvas, not here. */}
               <div className="mt-0.5 h-3.5 truncate pl-1 text-[10px] font-medium leading-[14px] text-neutral-500">{inner ? String(i + 1).padStart(2, "0") : "Capa"}</div>
             </div>
           );
         })}
         <button
           onClick={addPage}
-          className="mb-4 grid shrink-0 place-items-center rounded-md border-2 border-dashed border-neutral-300 text-neutral-500 hover:border-indigo-400 hover:text-indigo-600 dark:border-neutral-700"
-          style={{ width: Math.max(width * scale, 40), height: THUMB_H }}
+          className="grid shrink-0 place-items-center rounded-md bg-[#1b1a17] text-white hover:bg-neutral-700 dark:bg-white dark:text-[#1b1a17]"
+          style={{ width: Math.max(width * scale + 4, 44), height: THUMB_BOX_H }}
           title="Adicionar página"
           aria-label="Adicionar página"
         >
-          <Icon name="add" className="!text-[18px]" />
+          <Plus size={20} strokeWidth={2} />
         </button>
       </div>
     </div>
