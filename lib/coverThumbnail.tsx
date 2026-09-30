@@ -5,7 +5,7 @@ import { createRoot } from "react-dom/client";
 import { PageStage } from "@/components/story/PageStage";
 import { loadFonts } from "@/components/story/useFontsReady";
 import { FORMATS } from "@/lib/formats";
-import { loadImage } from "@/lib/images";
+import { loadPageImage } from "@/lib/images";
 import type { Story } from "@/types/story";
 
 // Yields one task so React can commit, like React's own scheduler does. Unlike
@@ -27,7 +27,7 @@ const tick = () =>
 export async function generateCoverThumbnail(story: Story, targetWidth = 300, mimeType = "image/jpeg"): Promise<string> {
   const { cover, theme, format } = story;
   await loadFonts([theme.fontHeading, theme.fontBody]);
-  const hasImage = cover.imageUrl ? await loadImage(cover.imageUrl).then(() => true, () => false) : false;
+  const hasImage = cover.imageUrl ? await loadPageImage(cover.imageUrl).then(() => true, () => false) : false;
 
   const host = document.createElement("div");
   host.style.cssText = "position:fixed;left:-100000px;top:0;pointer-events:none";

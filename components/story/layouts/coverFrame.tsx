@@ -1,13 +1,13 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { clampedHeight, CoverImage, editable, fieldText, fitFontSize, GHOST_OPACITY, margin, measureText, paperFill, safeInset } from "../primitives";
+import { clampedHeight, CoverImage, editable, fieldText, fitFontSize, GHOST_OPACITY, inkFill, margin, measureText, paperFill, safeInset } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Photo card cover: the image sits inset with breathing room all around, title below. */
 export const CoverFrame: LayoutComponent = ({ page, theme, width: W, height: H, editingField, onEditField, placeholders }) => {
-  const { text, accent } = theme.colors;
-  const paper = paperFill(page, theme);
+  const ink = inkFill(page);
+  const paper = paperFill(page);
   const m = margin(W);
   const cw = W - m * 2;
   const frameTop = m * 1.6 + safeInset(W, H);
@@ -34,9 +34,9 @@ export const CoverFrame: LayoutComponent = ({ page, theme, width: W, height: H, 
   return (
     <Group>
       <Rect width={W} height={H} fill={paper} />
-      <CoverImage src={page.imageUrl} x={m} y={frameTop} width={cw} height={frameH} placeholder={accent} background={paper} fit={page.imageFit} />
-      {title && <Text {...titleBase} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fontSize={titleSize} fill={text} />}
-      {dek && <Text {...dekCfg} {...editable("body", editingField, onEditField)} x={m} y={dekY} height={dekH} fill={text} opacity={dekF.ghost ? GHOST_OPACITY : 0.75} ellipsis />}
+      <CoverImage src={page.imageUrl} x={m} y={frameTop} width={cw} height={frameH} paper={paper} fit={page.imageFit} />
+      {title && <Text {...titleBase} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fontSize={titleSize} fill={ink} />}
+      {dek && <Text {...dekCfg} {...editable("body", editingField, onEditField)} x={m} y={dekY} height={dekH} fill={ink} opacity={dekF.ghost ? GHOST_OPACITY : 1} ellipsis />}
     </Group>
   );
 };

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/editor/Icon";
 import { FORMATS } from "@/lib/formats";
 import { editorHref, useLibrary } from "@/lib/library";
+import { inkHex, paperHex } from "@/lib/palette";
 import type { Story } from "@/types/story";
 
 /** Thickness of the shelf board, and the room under it for each cover's name. */
@@ -53,11 +54,10 @@ export function Book({ story, onRename, onDelete }: Props) {
   );
 }
 
-/** Stand-in while a thumbnail is being made (stories saved before the shelf existed): the theme's colours and the cover title. */
+/** Stand-in while a thumbnail is being made: the cover's paper and ink, and its title. */
 function PendingCover({ story }: { story: Story }) {
-  const { background, text } = story.theme.colors;
   return (
-    <div className="flex h-full w-full animate-pulse items-end p-[9%]" style={{ background, color: text }}>
+    <div className="flex h-full w-full animate-pulse items-end p-[9%]" style={{ background: paperHex(story.cover.paper), color: inkHex(story.cover.ink) }}>
       <span className="line-clamp-4 text-[13px] font-bold leading-tight" style={{ fontFamily: `"${story.theme.fontHeading}"` }}>
         {story.cover.title || story.name}
       </span>

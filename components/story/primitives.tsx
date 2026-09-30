@@ -2,7 +2,8 @@
 
 import Konva from "konva";
 import { Group, Image as KImage, Rect } from "react-konva";
-import type { ImageFit, PaperColor, StoryPage, Theme } from "@/types/story";
+import { inkHex, paperHex } from "@/lib/palette";
+import type { ImageFit, StoryPage } from "@/types/story";
 import type { EditableField } from "./layouts/types";
 import { useImage } from "./useImage";
 
@@ -79,13 +80,11 @@ function coverCrop(iw: number, ih: number, w: number, h: number) {
   return { x: 0, y: (ih - ch) / 2, width: iw, height: ch };
 }
 
-/** Colour swatches the "Papel" picker offers; a page with no override uses its theme's own background. */
-export const PAPER_COLORS: Record<PaperColor, string> = { white: "#ffffff", yellow: "#fbf0d1" };
+/** A page's paper (lib/palette.ts): the page's base fill, and what shows wherever nothing else is. */
+export const paperFill = (page: StoryPage) => paperHex(page.paper);
 
-/** A page's background: its own paper override, or the theme's. Used both for the base fill and to letterbox an image that doesn't fill its box. */
-export function paperFill(page: StoryPage, theme: Theme) {
-  return page.paper ? PAPER_COLORS[page.paper] : theme.colors.background;
-}
+/** The ink a page's text is printed in (lib/palette.ts). */
+export const inkFill = (page: StoryPage) => inkHex(page.ink);
 
 type CoverImageProps = {
   src?: string;
@@ -93,28 +92,34 @@ type CoverImageProps = {
   y: number;
   width: number;
   height: number;
-  /** Shown, tinted, when no image is set at all. */
-  placeholder: string;
-  /** The page's own background, shown behind an image that doesn't fill the whole box. */
-  background: string;
+  /** The page's paper: what the image is faded into, and what shows around it when it doesn't fill its box. */
+  paper: string;
   fit?: ImageFit;
 };
 
-/** A page's image, drawn according to its fit mode ("fill" — crop to cover, the default — or the whole image placed at its natural or a contained size). */
-export function CoverImage({ src, x, y, width, height, placeholder, background, fit = "fill" }: CoverImageProps) {
-  const img = useImage(src);
-  if (!img) return <Rect x={x} y={y} width={width} height={height} fill={placeholder} opacity={0.18} />;
+/**
+ * A page's image, drawn according to its fit mode ("fill" — crop to cover, the default — or
+ * the whole image placed at its natural or a contained size), and faded into the paper as far
+ * as text in any ink needs to stay legible on it (see loadPageImage). With no image there's
+ * nothing to draw: the paper shows.
+ */
+export function CoverImage({ src, x, y, width, height, paper, fit = "fill" }: CoverImageProps) {
+  const loaded = useImage(src);
+  if (!loaded) return null;
+  const { image: img } = loaded;
+  const opacity = loaded.opacity[paper] ?? 1;
   const iw = img.naturalWidth || img.width;
   const ih = img.naturalHeight || img.height;
 
   if (fit === "fill") {
+    // The page's own paper fill is already under the box, so the fade has something to show.
     const crop = coverCrop(iw, ih, width, height);
-    return <KImage image={img} x={x} y={y} width={width} height={height} crop={crop} />;
+    return <KImage image={img} x={x} y={y} width={width} height={height} crop={crop} opacity={opacity} />;
   }
 
   // "real": the image at its native pixel size. Otherwise scaled down (never up) to fit
   // entirely inside the box, then anchored per `fit`. Either way, the box may show more of
-  // the page's own background than the image covers, so it's filled first and clipped.
+  // the paper than the image covers, so it's filled first and clipped.
   const scale = fit === "real" ? 1 : Math.min(width / iw, height / ih, 1);
   const dw = iw * scale;
   const dh = ih * scale;
@@ -122,8 +127,8 @@ export function CoverImage({ src, x, y, width, height, placeholder, background, 
   const dy = y + (height - dh) / 2;
   return (
     <Group clipX={x} clipY={y} clipWidth={width} clipHeight={height}>
-      <Rect x={x} y={y} width={width} height={height} fill={background} />
-      <KImage image={img} x={dx} y={dy} width={dw} height={dh} />
+      <Rect x={x} y={y} width={width} height={height} fill={paper} />
+      <KImage image={img} x={dx} y={dy} width={dw} height={dh} opacity={opacity} />
     </Group>
   );
 }

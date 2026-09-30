@@ -3,9 +3,12 @@
 import { useLibrary } from "@/lib/library";
 import type { Story } from "@/types/story";
 
+/** Bump when the renderer changes how covers look, so every saved thumbnail is redrawn. 2: paper and ink colours. */
+const RENDER_VERSION = 2;
+
 /** Short fingerprint of everything that can change how a cover looks. */
 export function coverKey(s: Story) {
-  const str = JSON.stringify([s.format, s.theme, s.name, s.cover]);
+  const str = JSON.stringify([RENDER_VERSION, s.format, s.theme, s.name, s.cover]);
   let h = 5381;
   for (let i = 0; i < str.length; i++) h = (h * 33) ^ str.charCodeAt(i);
   return (h >>> 0).toString(36);

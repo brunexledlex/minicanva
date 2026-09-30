@@ -1,7 +1,7 @@
 "use client";
 
 import { FORMATS } from "@/lib/formats";
-import { loadImage } from "@/lib/images";
+import { loadPageImage } from "@/lib/images";
 import { getStage } from "@/lib/stages";
 import { allPages } from "@/lib/store";
 import type { Story, StoryPage } from "@/types/story";
@@ -20,7 +20,7 @@ const frame = () => new Promise((r) => requestAnimationFrame(r));
 
 /** Waits until every page's image and font is loaded and drawn into its stage. */
 async function ready(pages: StoryPage[]) {
-  await Promise.allSettled(pages.map((p) => (p.imageUrl ? loadImage(p.imageUrl) : null)));
+  await Promise.allSettled(pages.map((p) => (p.imageUrl ? loadPageImage(p.imageUrl) : null)));
   await document.fonts.ready;
   await frame();
   await frame();

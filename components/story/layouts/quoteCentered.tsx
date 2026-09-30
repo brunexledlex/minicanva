@@ -1,14 +1,14 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { contentBottom, editable, fieldText, fitFontSize, GHOST_OPACITY, margin, measureText, paperFill, safeInset } from "../primitives";
+import { contentBottom, editable, fieldText, fitFontSize, GHOST_OPACITY, inkFill, margin, measureText, paperFill, safeInset } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Pull quote: the quote (title) and its author (body), centred. */
 export const QuoteCentered: LayoutComponent = (props) => {
   const { page, theme, width: W, height: H, editingField, onEditField, placeholders } = props;
-  const { text } = theme.colors;
-  const paper = paperFill(page, theme);
+  const ink = inkFill(page);
+  const paper = paperFill(page);
   const m = margin(W);
   const qw = (W - m * 2) * 0.92;
   const qx = (W - qw) / 2;
@@ -33,8 +33,8 @@ export const QuoteCentered: LayoutComponent = (props) => {
   return (
     <Group>
       <Rect width={W} height={H} fill={paper} />
-      {quote && <Text {...quoteBase} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={qx} y={quoteY} fontSize={quoteSize} fill={text} />}
-      {author && <Text {...authorCfg} {...editable("body", editingField, onEditField)} x={qx} y={authorY} fill={text} opacity={authorF.ghost ? GHOST_OPACITY : 0.7} />}
+      {quote && <Text {...quoteBase} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={qx} y={quoteY} fontSize={quoteSize} fill={ink} />}
+      {author && <Text {...authorCfg} {...editable("body", editingField, onEditField)} x={qx} y={authorY} fill={ink} opacity={authorF.ghost ? GHOST_OPACITY : 1} />}
     </Group>
   );
 };

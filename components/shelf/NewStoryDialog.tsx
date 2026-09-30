@@ -8,6 +8,7 @@ import { useFontsReady } from "@/components/story/useFontsReady";
 import { blankStory } from "@/lib/defaults";
 import { FORMATS } from "@/lib/formats";
 import { editorHref } from "@/lib/library";
+import { DEFAULT_INK, DEFAULT_PAPER, inkHex, paperHex } from "@/lib/palette";
 import { useEditor } from "@/lib/store";
 import { getTheme, THEME_FONTS, THEMES } from "@/lib/themes";
 import type { StoryFormat } from "@/types/story";
@@ -79,9 +80,10 @@ export function NewStoryDialog({ open, onClose }: { open: boolean; onClose: () =
                   active ? "border-indigo-500 ring-1 ring-indigo-500" : "border-neutral-200 hover:border-neutral-300 dark:border-neutral-700"
                 }`}
               >
+                {/* A style is only its fonts, so each sample is the same paper and ink in a different typeface. */}
                 <span
-                  className="grid h-8 w-full place-items-center rounded-lg text-base font-bold"
-                  style={{ background: t.colors.background, color: t.colors.text, fontFamily: `"${t.fontHeading}"` }}
+                  className="grid h-8 w-full place-items-center rounded-lg text-base font-bold shadow-[inset_0_0_0_1px_rgba(0,0,0,.06)]"
+                  style={{ background: paperHex(DEFAULT_PAPER), color: inkHex(DEFAULT_INK), fontFamily: `"${t.fontHeading}"` }}
                 >
                   Aa
                 </span>

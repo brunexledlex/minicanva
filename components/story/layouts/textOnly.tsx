@@ -1,14 +1,14 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { contentBottom, editable, fieldText, GHOST_OPACITY, margin, measureText, paperFill, safeInset } from "../primitives";
+import { contentBottom, editable, fieldText, GHOST_OPACITY, inkFill, margin, measureText, paperFill, safeInset } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** A reading page: title and a generous body column. */
 export const TextOnly: LayoutComponent = (props) => {
   const { page, theme, width: W, height: H, editingField, onEditField, placeholders } = props;
-  const { text } = theme.colors;
-  const paper = paperFill(page, theme);
+  const ink = inkFill(page);
+  const paper = paperFill(page);
   const m = margin(W);
   const cw = W - m * 2;
 
@@ -25,7 +25,7 @@ export const TextOnly: LayoutComponent = (props) => {
   return (
     <Group>
       <Rect width={W} height={H} fill={paper} />
-      {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fill={text} />}
+      {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fill={ink} />}
       {body && bodyH > 0 && (
         <Text
           {...editable("body", editingField, onEditField)}
@@ -37,8 +37,8 @@ export const TextOnly: LayoutComponent = (props) => {
           fontFamily={theme.fontBody}
           fontSize={W * 0.035}
           lineHeight={1.5}
-          fill={text}
-          opacity={bodyF.ghost ? GHOST_OPACITY : 0.88}
+          fill={ink}
+          opacity={bodyF.ghost ? GHOST_OPACITY : 1}
           ellipsis
         />
       )}

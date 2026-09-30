@@ -1,14 +1,14 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, margin, measureText, paperFill, safeInset, splitColumns } from "../primitives";
+import { contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, inkFill, margin, measureText, paperFill, safeInset, splitColumns } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Title across the top, optional image band, and the body flowing through two columns. */
 export const TwoColumn: LayoutComponent = (props) => {
   const { page, theme, width: W, height: H, editingField, onEditField, placeholders } = props;
-  const { text, accent } = theme.colors;
-  const paper = paperFill(page, theme);
+  const ink = inkFill(page);
+  const paper = paperFill(page);
   const m = margin(W);
   const cw = W - m * 2;
   const gutter = m * 0.55;
@@ -34,11 +34,11 @@ export const TwoColumn: LayoutComponent = (props) => {
   return (
     <Group>
       <Rect width={W} height={H} fill={paper} />
-      {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fill={text} />}
-      {imgH > 0 && <CoverImage src={page.imageUrl} x={m} y={imgY} width={cw} height={imgH} placeholder={accent} background={paper} fit={page.imageFit} />}
-      {col1 && <Text {...bodyCfg} {...editable("body", editingField, onEditField)} text={col1} x={m} y={colY} height={colH} fill={text} opacity={bodyF.ghost ? GHOST_OPACITY : 0.88} />}
+      {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fill={ink} />}
+      {imgH > 0 && <CoverImage src={page.imageUrl} x={m} y={imgY} width={cw} height={imgH} paper={paper} fit={page.imageFit} />}
+      {col1 && <Text {...bodyCfg} {...editable("body", editingField, onEditField)} text={col1} x={m} y={colY} height={colH} fill={ink} opacity={bodyF.ghost ? GHOST_OPACITY : 1} />}
       {col2 && (
-        <Text {...bodyCfg} {...editable("body", editingField, onEditField)} text={col2} x={m + colW + gutter} y={colY} height={colH} fill={text} opacity={bodyF.ghost ? GHOST_OPACITY : 0.88} ellipsis />
+        <Text {...bodyCfg} {...editable("body", editingField, onEditField)} text={col2} x={m + colW + gutter} y={colY} height={colH} fill={ink} opacity={bodyF.ghost ? GHOST_OPACITY : 1} ellipsis />
       )}
     </Group>
   );

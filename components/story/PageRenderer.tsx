@@ -5,6 +5,7 @@ import { FORMATS } from "@/lib/formats";
 import type { StoryFormat, StoryPage, Theme } from "@/types/story";
 import { getLayoutDef } from "./layouts";
 import type { EditableField } from "./layouts/types";
+import { inkFill, paperFill } from "./primitives";
 
 export type PageRenderProps = {
   page: StoryPage;
@@ -25,8 +26,8 @@ export function PageRenderer({ page, theme, format, storyName, pageNumber, pageC
   if (!def) {
     return (
       <Group>
-        <Rect width={width} height={height} fill={theme.colors.background} />
-        <Text width={width} y={height / 2 - 20} align="center" text={`Layout desconhecido: ${page.layout}`} fontSize={36} fill={theme.colors.text} />
+        <Rect width={width} height={height} fill={paperFill(page)} />
+        <Text width={width} y={height / 2 - 20} align="center" text={`Layout desconhecido: ${page.layout}`} fontSize={36} fill={inkFill(page)} />
       </Group>
     );
   }

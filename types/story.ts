@@ -1,9 +1,9 @@
+/** A typographic style. Its colours aren't part of it: they come from each page's paper and ink (lib/palette.ts). */
 export type Theme = {
   id: string;
   name: string;
   fontHeading: string;
   fontBody: string;
-  colors: { background: string; text: string; accent: string };
 };
 
 export type PageLayout =
@@ -18,8 +18,11 @@ export type PageLayout =
   | "quote-centered"
   | "two-column";
 
-/** The paper a page sits on; unset keeps the theme's own background. */
+/** The paper a page is printed on: the colour left wherever nothing else is. Unset is white. */
 export type PaperColor = "white" | "yellow";
+
+/** The Riso ink a page's text is printed in. Unset is black. */
+export type InkId = "black" | "blue" | "red" | "green" | "purple";
 
 /** How a page's image fills its box: "fill" crops to cover it (the default); the rest fit the whole image in, anchored as named. */
 export type ImageFit = "fill" | "real" | "center" | "left" | "right";
@@ -31,6 +34,7 @@ export type StoryPage = {
   body?: string;
   imageUrl?: string;
   paper?: PaperColor;
+  ink?: InkId;
   imageFit?: ImageFit;
 };
 

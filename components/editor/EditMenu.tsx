@@ -1,14 +1,15 @@
 "use client";
 
-import { AlignCenterHorizontal, AlignLeft, AlignRight, ArrowLeft, ImageOff, ImagePlus, Loader2, Maximize2, Minimize2, Palette, PanelTop, Upload } from "lucide-react";
+import { AlignCenterHorizontal, AlignLeft, AlignRight, ArrowLeft, Droplet, FileIcon, ImageOff, ImagePlus, Loader2, Maximize2, Minimize2, PanelTop, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { getLayoutDef, LAYOUT_DEFS } from "@/components/story/layouts";
 import { DEFAULT_IMAGES } from "@/lib/defaults";
-import type { ImageFit, PaperColor, StoryPage } from "@/types/story";
+import { DEFAULT_INK, DEFAULT_PAPER, inkHex, INKS, paperHex, PAPERS } from "@/lib/palette";
+import type { ImageFit, StoryPage } from "@/types/story";
 import { LayoutIcon } from "./LayoutIcon";
 import { usePageImageUpload } from "./usePageImage";
 
-type Tool = "paper" | "image" | "layout";
+type Tool = "paper" | "ink" | "image" | "layout";
 type Change = (patch: Partial<StoryPage>) => void;
 
 /** A square tile, the unit both levels of the menu are built from. */
@@ -18,9 +19,10 @@ const active = "border-indigo-500 ring-2 ring-indigo-500";
 const row = "no-scrollbar flex items-start gap-2 overflow-x-auto";
 
 /**
- * The edit screen's bottom menu, two levels deep. The first shows the tools (Papel, Imagem,
- * Layout) and "Guardar"; tapping a tool swaps in its options behind a back arrow. Choosing an
- * option applies it to the draft right away and stays on that level, so options can be compared.
+ * The edit screen's bottom menu, two levels deep. The first shows the tools (Papel, Tinta,
+ * Imagem, Layout) and "Guardar"; tapping a tool swaps in its options behind a back arrow.
+ * Choosing an option applies it to the draft right away and stays on that level, so options
+ * can be compared.
  */
 export function EditMenu({ page, isCover, onChange, onSave }: { page: StoryPage; isCover: boolean; onChange: Change; onSave: () => void }) {
   const [tool, setTool] = useState<Tool | null>(null);
@@ -32,8 +34,12 @@ export function EditMenu({ page, isCover, onChange, onSave }: { page: StoryPage;
     <div className="shrink-0 border-t border-neutral-200 bg-white px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] dark:border-neutral-800 dark:bg-neutral-900">
       {open === null ? (
         <div className="flex items-center gap-2">
+          {/* Both colour tools show the page's current colour: the sheet in its paper, the drop in its ink. */}
           <button onClick={() => setTool("paper")} title="Papel" aria-label="Papel" className={`${tile} ${idle}`}>
-            <Palette size={22} strokeWidth={1.75} />
+            <FileIcon size={22} strokeWidth={1.75} fill={paperHex(page.paper)} />
+          </button>
+          <button onClick={() => setTool("ink")} title="Tinta" aria-label="Tinta" className={`${tile} ${idle}`}>
+            <Droplet size={22} strokeWidth={1.75} color={inkHex(page.ink)} fill={inkHex(page.ink)} />
           </button>
           {hasImage && (
             <button onClick={() => setTool("image")} title="Imagem" aria-label="Imagem" className={`${tile} ${idle}`}>
@@ -55,6 +61,7 @@ export function EditMenu({ page, isCover, onChange, onSave }: { page: StoryPage;
           </button>
           <div className="min-w-0 flex-1">
             {open === "paper" && <PaperOptions page={page} onChange={onChange} />}
+            {open === "ink" && <InkOptions page={page} onChange={onChange} />}
             {open === "image" && <ImageOptions page={page} onChange={onChange} />}
             {open === "layout" && <LayoutOptions page={page} isCover={isCover} onChange={onChange} />}
           </div>
@@ -64,25 +71,32 @@ export function EditMenu({ page, isCover, onChange, onSave }: { page: StoryPage;
   );
 }
 
-const PAPER_OPTIONS: { id: PaperColor; label: string; swatch: string }[] = [
-  { id: "white", label: "Branco", swatch: "#ffffff" },
-  { id: "yellow", label: "Amarelo", swatch: "#fbf0d1" },
-];
+/** A swatch for the colour pickers: "Aa" in an ink on a paper, a sample of how the page's text will print. */
+function Sample({ paper, ink, on, label, onClick }: { paper: string; ink: string; on: boolean; label: string; onClick: () => void }) {
+  return (
+    <button role="radio" aria-checked={on} title={label} aria-label={label} onClick={onClick} className={`${tile} ${on ? active : idle} text-lg font-bold`} style={{ background: paper, color: ink }}>
+      Aa
+    </button>
+  );
+}
 
 function PaperOptions({ page, onChange }: { page: StoryPage; onChange: Change }) {
+  const current = page.paper ?? DEFAULT_PAPER;
   return (
     <div className={row} role="radiogroup" aria-label="Cor do papel">
-      {PAPER_OPTIONS.map((opt) => (
-        <button
-          key={opt.id}
-          role="radio"
-          aria-checked={page.paper === opt.id}
-          title={opt.label}
-          aria-label={opt.label}
-          onClick={() => onChange({ paper: opt.id })}
-          className={`${tile} ${page.paper === opt.id ? active : idle}`}
-          style={{ background: opt.swatch }}
-        />
+      {PAPERS.map((p) => (
+        <Sample key={p.id} paper={p.hex} ink={inkHex(page.ink)} on={current === p.id} label={p.name} onClick={() => onChange({ paper: p.id })} />
+      ))}
+    </div>
+  );
+}
+
+function InkOptions({ page, onChange }: { page: StoryPage; onChange: Change }) {
+  const current = page.ink ?? DEFAULT_INK;
+  return (
+    <div className={row} role="radiogroup" aria-label="Cor da tinta">
+      {INKS.map((i) => (
+        <Sample key={i.id} paper={paperHex(page.paper)} ink={i.hex} on={current === i.id} label={i.name} onClick={() => onChange({ ink: i.id })} />
       ))}
     </div>
   );

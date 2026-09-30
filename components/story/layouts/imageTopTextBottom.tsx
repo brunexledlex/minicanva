@@ -1,14 +1,14 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, margin, measureText, paperFill } from "../primitives";
+import { contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, inkFill, margin, measureText, paperFill } from "../primitives";
 import type { LayoutComponent } from "./types";
 
 /** Full-bleed image on the top half, title and body below. */
 export const ImageTopTextBottom: LayoutComponent = (props) => {
   const { page, theme, width: W, height: H, editingField, onEditField, placeholders } = props;
-  const { text, accent } = theme.colors;
-  const paper = paperFill(page, theme);
+  const ink = inkFill(page);
+  const paper = paperFill(page);
   const m = margin(W);
   const cw = W - m * 2;
   const imgH = Math.round(H * 0.5);
@@ -26,8 +26,8 @@ export const ImageTopTextBottom: LayoutComponent = (props) => {
   return (
     <Group>
       <Rect width={W} height={H} fill={paper} />
-      <CoverImage src={page.imageUrl} x={0} y={0} width={W} height={imgH} placeholder={accent} background={paper} fit={page.imageFit} />
-      {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fill={text} />}
+      <CoverImage src={page.imageUrl} x={0} y={0} width={W} height={imgH} paper={paper} fit={page.imageFit} />
+      {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} fill={ink} />}
       {body && bodyH > 0 && (
         <Text
           {...editable("body", editingField, onEditField)}
@@ -39,8 +39,8 @@ export const ImageTopTextBottom: LayoutComponent = (props) => {
           fontFamily={theme.fontBody}
           fontSize={W * 0.03}
           lineHeight={1.45}
-          fill={text}
-          opacity={bodyF.ghost ? GHOST_OPACITY : 0.85}
+          fill={ink}
+          opacity={bodyF.ghost ? GHOST_OPACITY : 1}
           ellipsis
         />
       )}

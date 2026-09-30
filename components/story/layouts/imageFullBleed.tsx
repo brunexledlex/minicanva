@@ -1,16 +1,16 @@
 "use client";
 
 import { Group, Rect, Text } from "react-konva";
-import { clampedHeight, contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, margin, paperFill } from "../primitives";
+import { clampedHeight, contentBottom, CoverImage, editable, fieldText, GHOST_OPACITY, inkFill, margin, paperFill } from "../primitives";
 import type { LayoutComponent } from "./types";
 
-/** Edge-to-edge photo with an optional title and caption over a bottom fade. */
+/** Edge-to-edge photo with an optional title and caption printed over it. */
 export const ImageFullBleed: LayoutComponent = (props) => {
   const { page, theme, width: W, height: H, editingField, onEditField, placeholders } = props;
   const m = margin(W);
   const cw = W - m * 2;
-  const white = "#ffffff";
-  const paper = paperFill(page, theme);
+  const ink = inkFill(page);
+  const paper = paperFill(page);
 
   let y = contentBottom(W, H);
   const capF = fieldText(page.body, placeholders?.body);
@@ -30,9 +30,9 @@ export const ImageFullBleed: LayoutComponent = (props) => {
   return (
     <Group>
       <Rect width={W} height={H} fill={paper} />
-      <CoverImage src={page.imageUrl} x={0} y={0} width={W} height={H} placeholder={theme.colors.accent} background={paper} fit={page.imageFit} />
-      {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} height={titleH} fill={white} ellipsis />}
-      {caption && <Text {...capCfg} {...editable("body", editingField, onEditField)} x={m} y={capY} height={capH} fill={white} opacity={capF.ghost ? GHOST_OPACITY : 0.88} ellipsis />}
+      <CoverImage src={page.imageUrl} x={0} y={0} width={W} height={H} paper={paper} fit={page.imageFit} />
+      {title && <Text {...titleCfg} {...editable("title", editingField, onEditField)} opacity={titleF.ghost ? GHOST_OPACITY : 1} x={m} y={titleY} height={titleH} fill={ink} ellipsis />}
+      {caption && <Text {...capCfg} {...editable("body", editingField, onEditField)} x={m} y={capY} height={capH} fill={ink} opacity={capF.ghost ? GHOST_OPACITY : 1} ellipsis />}
     </Group>
   );
 };
