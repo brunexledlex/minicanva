@@ -3,21 +3,21 @@ import type { Theme } from "@/types/story";
 export const THEMES: Theme[] = [
   {
     id: "editorial-serif",
-    name: "Editorial serif",
+    name: "Editorial",
     fontHeading: "Playfair Display",
     fontBody: "Source Serif 4",
     colors: { background: "#f4efe6", text: "#1b1a17", accent: "#c8553d" },
   },
   {
     id: "tech-mono",
-    name: "Tech mono",
+    name: "Tech",
     fontHeading: "Space Mono",
     fontBody: "IBM Plex Mono",
     colors: { background: "#0f1115", text: "#e8ecef", accent: "#7cf29a" },
   },
   {
     id: "minimal-sans",
-    name: "Minimal sans",
+    name: "Minimal",
     fontHeading: "Inter",
     fontBody: "Inter",
     colors: { background: "#ffffff", text: "#111111", accent: "#2f5bff" },

@@ -65,8 +65,7 @@ export function NewStoryDialog({ open, onClose }: { open: boolean; onClose: () =
           )}
         </div>
 
-        <p className="mb-2 mt-5 self-start text-xs font-medium text-neutral-500">Estilo</p>
-        <div className="flex w-full gap-2" role="radiogroup" aria-label="Estilo">
+        <div className="mt-5 flex w-full gap-2" role="radiogroup" aria-label="Estilo">
           {THEMES.map((t) => {
             const active = t.id === themeId;
             return (
@@ -76,12 +75,12 @@ export function NewStoryDialog({ open, onClose }: { open: boolean; onClose: () =
                 role="radio"
                 aria-checked={active}
                 onClick={() => setThemeId(t.id)}
-                className={`flex flex-1 flex-col items-center gap-1.5 rounded-xl border p-1.5 ${
+                className={`flex flex-1 flex-col items-center gap-1 rounded-xl border p-1 ${
                   active ? "border-indigo-500 ring-1 ring-indigo-500" : "border-neutral-200 hover:border-neutral-300 dark:border-neutral-700"
                 }`}
               >
                 <span
-                  className="grid h-12 w-full place-items-center rounded-lg text-base font-bold"
+                  className="grid h-8 w-full place-items-center rounded-lg text-base font-bold"
                   style={{ background: t.colors.background, color: t.colors.text, fontFamily: `"${t.fontHeading}"` }}
                 >
                   Aa

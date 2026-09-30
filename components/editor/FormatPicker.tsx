@@ -39,19 +39,26 @@ export function FormatPicker({ format, onChange, size = "sm" }: { format: StoryF
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
+          aria-label={`Formato: ${label}`}
           className="-mx-1.5 -my-1 flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-xs text-neutral-500 hover:bg-white dark:hover:bg-neutral-800"
         >
           <FormatShape format={format} size={8} active />
           <span className="min-w-0 truncate">
-            {label} · {fw}×{fh}
+            {fw}×{fh}
           </span>
           <Icon name="expand_more" className="!text-[16px] shrink-0 text-neutral-400" />
         </button>
       )}
       {open && (
-        <div role="radiogroup" aria-label="Formato" className="absolute left-0 top-full z-20 mt-1 w-56 rounded-xl border border-neutral-200 bg-white p-1 shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+        // One row of equal-width options, each a shape with its name underneath. Under the top bar's label it hangs from the left; in the dialog it's centred on the preview.
+        <div
+          role="radiogroup"
+          aria-label="Formato"
+          className={`absolute top-full z-20 mt-1 grid w-max grid-cols-3 gap-1 rounded-xl border border-neutral-200 bg-white p-1 shadow-xl dark:border-neutral-700 dark:bg-neutral-900 ${
+            size === "lg" ? "left-0" : "left-1/2 -translate-x-1/2"
+          }`}
+        >
           {FORMAT_KEYS.map((f) => {
-            const info = FORMATS[f];
             const active = f === format;
             return (
               <button
@@ -63,19 +70,14 @@ export function FormatPicker({ format, onChange, size = "sm" }: { format: StoryF
                   onChange(f);
                   setOpen(false);
                 }}
-                className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-1.5 text-left text-sm ${
+                className={`flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-sm ${
                   active ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300" : "hover:bg-neutral-100 dark:hover:bg-neutral-800"
                 }`}
               >
-                <span className="grid h-6 w-5 shrink-0 place-items-center">
+                <span className="grid h-7 shrink-0 place-items-center">
                   <FormatShape format={f} size={14} active={active} />
                 </span>
-                <span className="min-w-0">
-                  {info.label}
-                  <span className="block text-xs tabular-nums text-neutral-400">
-                    {f} · {info.width}×{info.height}
-                  </span>
-                </span>
+                {FORMATS[f].label}
               </button>
             );
           })}
